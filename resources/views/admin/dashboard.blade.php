@@ -1,0 +1,341 @@
+@extends('layouts.admin')
+
+@section('title', 'Dashboard')
+@section('page-title', 'Dashboard')
+@section('page-description', 'Certificate Management Overview')
+
+@section('content')
+<div class="p-6 space-y-6">
+    <!-- KPI Cards - FORCED HORIZONTAL LAYOUT USING FLEXBOX -->
+    <div class="flex flex-col sm:flex-row gap-4 lg:gap-6">
+        <!-- Total Applications -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium card-text-secondary">Total Applications</p>
+                    <p class="text-2xl lg:text-3xl font-bold card-text-primary mt-2">{{ number_format($stats['total_applications']) }}</p>
+                    <p class="text-green-600 dark:text-green-400 text-sm font-medium mt-1">+12% vs last month</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Applications -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium card-text-secondary">Pending Review</p>
+                    <p class="text-2xl lg:text-3xl font-bold card-text-primary mt-2">{{ number_format($stats['pending_applications']) }}</p>
+                    <p class="text-yellow-600 dark:text-yellow-400 text-sm font-medium mt-1">{{ $stats['pending_applications'] > 0 ? 'Needs attention' : 'All clear' }}</p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/60 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-yellow-500 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verified Applications -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium card-text-secondary">Verified</p>
+                    <p class="text-2xl lg:text-3xl font-bold card-text-primary mt-2">{{ number_format($stats['verified_applications']) }}</p>
+                    @php $rate = $stats['total_applications'] ? round(($stats['verified_applications'] / $stats['total_applications']) * 100, 1) : 0; @endphp
+                    <p class="text-green-600 dark:text-green-400 text-sm font-medium mt-1">{{ $rate }}% completion</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium card-text-secondary">Documents</p>
+                    <p class="text-2xl lg:text-3xl font-bold card-text-primary mt-2">{{ number_format($stats['total_uploads']) }}</p>
+                    @php $avg = $stats['total_applications'] ? round($stats['total_uploads'] / $stats['total_applications'], 1) : 0; @endphp
+                    <p class="text-purple-600 dark:text-purple-400 text-sm font-medium mt-1">{{ $avg }} avg per app</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section - Side-by-Side Layout -->
+    <div class="w-full">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Line Chart - Left Side -->
+            <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold card-text-primary">Application Trends</h3>
+                    <p class="card-text-secondary text-sm">Monthly submissions over the last 12 months</p>
+                </div>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Donut Chart - Right Side -->
+            <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold card-text-primary">Verification Status</h3>
+                    <p class="card-text-secondary text-sm">Document status breakdown</p>
+                </div>
+                
+                <!-- Chart centered -->
+                <div class="flex justify-center mb-6">
+                    <div style="height: 200px; width: 200px; position: relative;">
+                        <canvas id="verificationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Legend Below Chart -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between py-2">
+                        <div class="flex items-center">
+                            <div class="legend-dot-pending"></div>
+                            <span class="text-sm font-medium card-text-primary">Pending</span>
+                        </div>
+                        <span class="text-sm font-bold card-text-primary">{{ $verificationStats['pending'] }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <div class="flex items-center">
+                            <div class="legend-dot-verified"></div>
+                            <span class="text-sm font-medium card-text-primary">Verified</span>
+                        </div>
+                        <span class="text-sm font-bold card-text-primary">{{ $verificationStats['verified'] }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <div class="flex items-center">
+                            <div class="legend-dot-rejected"></div>
+                            <span class="text-sm font-medium card-text-primary">Rejected</span>
+                        </div>
+                        <span class="text-sm font-bold card-text-primary">{{ $verificationStats['rejected'] }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-semibold card-text-primary">Recent Applications</h3>
+                <p class="card-text-secondary text-sm">Latest certificate applications submitted</p>
+            </div>
+            <a 
+                href="{{ route('admin.applicants.index') }}" 
+                @click.stop 
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+                View All
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                        <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Applicant</th>
+                        <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Email</th>
+                        <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Documents</th>
+                        <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Status</th>
+                        <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Date</th>
+                        <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse($recentApplications as $applicant)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="py-4 px-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-sm font-bold text-white">{{ strtoupper(substr($applicant->name, 0, 2)) }}</span>
+                                </div>
+                                <div>
+                                    <div class="font-medium table-text">{{ $applicant->name }}</div>
+                                    <div class="table-text-muted text-sm">#{{ str_pad($applicant->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 table-text">{{ Str::limit($applicant->email, 30) }}</td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                {{ $applicant->uploads->count() }} files
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            @if($applicant->status === 'pending')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/80 dark:text-yellow-300">
+                                    <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                                    Pending
+                                </span>
+                            @elseif($applicant->status === 'verified')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/60 dark:text-green-300">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Verified
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/60 dark:text-red-300">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Rejected
+                                </span>
+                            @endif
+                        </td>
+                        <td class="py-4 px-4">
+                            <div class="table-text">{{ $applicant->submitted_at->format('M j, Y') }}</div>
+                            <div class="table-text-muted text-sm">{{ $applicant->submitted_at->diffForHumans() }}</div>
+                        </td>
+                        <td class="py-4 px-4">
+                            <a 
+                                href="{{ route('admin.applicants.show', $applicant) }}" 
+                                @click.stop 
+                                class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                            >
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="py-12 text-center table-text-muted">
+                            <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-lg font-medium">No applications found</p>
+                            <p class="text-sm">Applications will appear here once submitted</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.documentElement.classList.contains('dark');
+
+    const colors = {
+        primary: '#3b82f6',
+        success: '#10b981',
+        warning: '#fbbf24',
+        danger: '#ef4444',
+        text: isDark ? '#f9fafb' : '#111827',
+        muted: isDark ? '#d1d5db' : '#6b7280',
+        background: isDark ? '#1f2937' : '#ffffff',
+        grid: isDark ? 'rgba(156, 163, 175, 0.1)' : 'rgba(229, 231, 235, 0.2)'
+    };
+
+    // Line Chart
+    const monthlyCtx = document.getElementById('monthlyChart');
+    if (monthlyCtx) {
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: @json($monthlyData->pluck('label')),
+                datasets: [{
+                    label: 'Applications',
+                    data: @json($monthlyData->pluck('count')),
+                    borderColor: colors.primary,
+                    backgroundColor: colors.primary + '20',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: colors.primary,
+                    pointBorderColor: colors.background,
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: colors.background,
+                        titleColor: colors.text,
+                        bodyColor: colors.muted,
+                        borderColor: colors.grid,
+                        borderWidth: 1,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: colors.grid },
+                        ticks: { color: colors.muted, font: { size: 12 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.grid },
+                        ticks: { color: colors.muted, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    }
+
+    // Donut Chart
+    const verificationCtx = document.getElementById('verificationChart');
+    if (verificationCtx) {
+        new Chart(verificationCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Verified', 'Rejected'],
+                datasets: [{
+                    data: [
+                        @json($verificationStats['pending']),
+                        @json($verificationStats['verified']),
+                        @json($verificationStats['rejected'])
+                    ],
+                    backgroundColor: ['#fbbf24', '#10b981', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: colors.background,
+                        titleColor: colors.text,
+                        bodyColor: colors.muted,
+                        borderColor: colors.grid,
+                        borderWidth: 1,
+                        cornerRadius: 8
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+@endsection

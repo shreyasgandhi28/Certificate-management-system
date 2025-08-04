@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarOpen: window.innerWidth >= 1024 }" x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val)); $watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Admin Dashboard') - {{ config('app.name', 'Certificate Management') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Enhanced Dark Mode + Fixed Click Handling -->
+    <style>
+        html.dark {
+            color-scheme: dark !important;
+        }
+        
+        /* Sidebar structure with proper toggle */
+        .sidebar-container {
+            width: 256px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            color: #111827;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-container.hidden {
+            transform: translateX(-100%);
+        }
+        
+        /* Main content that adapts to sidebar state */
+        .main-content {
+            margin-left: 256px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* FORCE dark mode colors */
+        .dark .sidebar-container {
+            background-color: #1f2937 !important;
+            color: #f9fafb !important;
+        }
+        
+        .dark .main-content {
+            background-color: #111827 !important;
+            color: #f9fafb !important;
+        }
+        
+        /* Top bar */
+        .topbar {
+            background-color: #ffffff;
+            border-color: #e5e7eb;
+            color: #111827;
+        }
+        
+        .dark .topbar {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+            color: #f9fafb !important;
+        }
+        
+        /* Text contrast classes */
+        .text-primary {
+            color: #111827 !important;
+        }
+        
+        .dark .text-primary {
+            color: #f9fafb !important;
+        }
+        
+        .text-secondary {
+            color: #6b7280 !important;
+        }
+        
+        .dark .text-secondary {
+            color: #d1d5db !important;
+        }
+        
+        .nav-link {
+            color: #374151 !important;
+        }
+        
+        .dark .nav-link {
+            color: #e5e7eb !important;
+        }
+        
+        .dark .nav-link:hover {
+            background-color: #374151 !important;
+            color: #f9fafb !important;
+        }
+        
+        /* Card text */
+        .card-text-primary {
+            color: #111827 !important;
+        }
+        
+        .dark .card-text-primary {
+            color: #f9fafb !important;
+        }
+        
+        .card-text-secondary {
+            color: #6b7280 !important;
+        }
+        
+        .dark .card-text-secondary {
+            color: #d1d5db !important;
+        }
+        
+        /* Table text */
+        .table-text {
+            color: #111827 !important;
+        }
+        
+        .dark .table-text {
+            color: #f9fafb !important;
+        }
+        
+        .table-text-muted {
+            color: #6b7280 !important;
+        }
+        
+        .dark .table-text-muted {
+            color: #d1d5db !important;
+        }
+        
+        /* Borders */
+        .border-custom {
+            border-color: #e5e7eb !important;
+        }
+        
+        .dark .border-custom {
+            border-color: #374151 !important;
+        }
+        
+        /* Mobile backdrop - only visible when explicitly shown */
+        .mobile-backdrop {
+            display: none;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar-container {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar-container.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-content.expanded {
+                margin-left: 0;
+            }
+            
+            /* Only show backdrop on mobile when sidebar is open */
+            .mobile-backdrop.show {
+                display: block !important;
+            }
+        }
+        
+        /* User initials */
+        .user-initials {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Chart legend colors */
+        .legend-dot-pending {
+            background-color: #fbbf24 !important;
+            width: 12px !important;
+            height: 12px !important;
+            border-radius: 50% !important;
+            margin-right: 12px !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .legend-dot-verified {
+            background-color: #10b981 !important;
+            width: 12px !important;
+            height: 12px !important;
+            border-radius: 50% !important;
+            margin-right: 12px !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .legend-dot-rejected {
+            background-color: #ef4444 !important;
+            width: 12px !important;
+            height: 12px !important;
+            border-radius: 50% !important;
+            margin-right: 12px !important;
+            flex-shrink: 0 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans antialiased">
+    <!-- FIXED Mobile backdrop - Only closes sidebar when clicked directly -->
+    <div 
+        x-show="sidebarOpen && window.innerWidth < 1024" 
+        x-transition.opacity 
+        @click.self="sidebarOpen = false" 
+        class="mobile-backdrop fixed inset-0 z-40 bg-black bg-opacity-50"
+        :class="sidebarOpen && window.innerWidth < 1024 ? 'show' : ''"
+    ></div>
+
+    <!-- WORKING Sidebar with Fixed Click Handling -->
+    <div 
+        :class="sidebarOpen ? 'sidebar-container open' : 'sidebar-container hidden'"
+        class="shadow-xl border-r border-custom"
+        @click.away="false"
+    >
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between h-16 px-6 bg-blue-600 flex-shrink-0">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                        <path d="M14 2v6h6"/>
+                        <path d="M16 13H8"/>
+                        <path d="M16 17H8"/>
+                        <path d="M10 9H8"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h1 class="text-lg font-semibold text-white">Certificate Manager</h1>
+                </div>
+            </div>
+            
+            <!-- Close button for mobile only -->
+            <button 
+                @click="sidebarOpen = false" 
+                class="lg:hidden p-2 rounded-lg text-white hover:bg-white/20 transition-colors"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- User Info -->
+        <div class="px-6 py-4 border-b border-custom flex-shrink-0">
+            <div class="flex items-center">
+                <div class="w-10 h-10 user-initials rounded-full flex items-center justify-center">
+                    <span class="text-sm font-bold">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-primary truncate">{{ auth()->user()->name }}</p>
+                    <p class="text-xs text-secondary truncate">{{ auth()->user()->email }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto">
+            <nav class="mt-6 px-3 pb-4">
+                <div class="space-y-1">
+                    <!-- Dashboard -->
+                    <a href="{{ route('admin.dashboard') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'nav-link hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+
+                    <!-- Applications -->
+                    <a href="{{ route('admin.applicants.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.applicants.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'nav-link hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        Applications
+                    </a>
+
+                    <!-- Documents -->
+                    <a href="{{ route('admin.uploads.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.uploads.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'nav-link hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        Documents
+                    </a>
+
+                    <!-- Certificates -->
+                    <a href="{{ route('admin.certificates.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.certificates.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'nav-link hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                        </svg>
+                        Certificates
+                    </a>
+
+                    <!-- Users -->
+                    <a href="{{ route('admin.users.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'nav-link hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 5.197V9a3 3 0 00-6 0v2.25"></path>
+                        </svg>
+                        Users
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Fixed Logout -->
+        <div class="p-4 border-t border-custom flex-shrink-0">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="group flex items-center w-full px-3 py-2 text-sm font-medium nav-link rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content with Fixed Click Handling -->
+    <div :class="sidebarOpen ? 'main-content' : 'main-content expanded'">
+        <!-- Top Header with WORKING Hamburger -->
+        <div class="topbar shadow-sm border-b">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <!-- WORKING Hamburger Menu -->
+                        <button 
+                            @click.stop="sidebarOpen = !sidebarOpen" 
+                            class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        
+                        <div>
+                            <h1 class="text-2xl font-bold text-primary">@yield('page-title', 'Dashboard')</h1>
+                            <p class="text-sm text-secondary">@yield('page-description', 'Manage your certificate applications')</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Header Controls - Fixed Click Handling -->
+                    <div class="flex items-center space-x-4">
+                        <!-- FIXED Dark Mode Toggle -->
+                        <button 
+                            @click.stop="darkMode = !darkMode" 
+                            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            <svg x-show="!darkMode" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                            <svg x-show="darkMode" class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- FIXED User Menu -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button 
+                                @click.stop="open = !open" 
+                                class="flex items-center text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 p-2 transition-colors"
+                            >
+                                <div class="w-8 h-8 user-initials rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-xs font-bold">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span>
+                                </div>
+                                <div class="text-left hidden sm:block">
+                                    <div class="text-sm font-medium text-primary">{{ auth()->user()->name }}</div>
+                                    <div class="text-xs text-secondary">Administrator</div>
+                                </div>
+                                <svg class="ml-2 h-4 w-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown Menu with Fixed Click Handling -->
+                            <div 
+                                x-show="open" 
+                                @click.away="open = false" 
+                                x-transition 
+                                class="origin-top-right absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 z-50"
+                            >
+                                <div class="py-1">
+                                    <a href="#" @click.stop class="group flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-700">Profile</a>
+                                    <a href="#" @click.stop class="group flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-700">Settings</a>
+                                </div>
+                                <div class="py-1">
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" @click.stop class="group flex items-center w-full px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">Logout</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <main class="flex-1">
+            @yield('content')
+        </main>
+    </div>
+</body>
+</html>

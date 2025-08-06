@@ -18,10 +18,10 @@ class FileUploadService
         $storedName = Str::uuid() . '.' . $extension;
         
         // Define upload path
-        $uploadPath = 'uploads/' . $applicant->id . '/' . $type;
+        $uploadPath = 'public/uploads/' . $applicant->id . '/' . $type;
         
         // Store file
-        $filePath = $file->storeAs($uploadPath, $storedName, 'local');
+        $filePath = $file->storeAs($uploadPath, $storedName, 'public');
         
         // Create upload record
         return Upload::create([

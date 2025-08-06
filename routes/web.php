@@ -36,6 +36,42 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         $uploads = \App\Models\Upload::with('applicant')->latest()->paginate(15);
         return view('admin.uploads.index', compact('uploads')); 
     })->name('uploads.index');
+    Route::get('/uploads/{upload}/view', function(\App\Models\Upload $upload) {
+        \Log::info('View request for upload:', [
+            'upload_id' => $upload->id,
+            'file_path' => $upload->file_path,
+            'stored_filename' => $upload->stored_filename
+        ]);
+
+        // Check all possible locations
+        $locations = [
+            storage_path('app/public/uploads/' . $upload->applicant_id . '/' . $upload->type . '/' . $upload->stored_filename),
+            storage_path('app/' . $upload->file_path),
+            storage_path('app/private/' . $upload->file_path),
+            storage_path('app/private/uploads/' . $upload->applicant_id . '/' . $upload->type . '/' . $upload->stored_filename)
+        ];
+
+        \Log::info('Checking locations:', ['locations' => $locations]);
+
+        foreach ($locations as $location) {
+            \Log::info('Checking location: ' . $location);
+            if (file_exists($location)) {
+                \Log::info('File found at: ' . $location);
+                return response()->file($location);
+            }
+        }
+
+        // Get all files in storage for debugging
+        $allFiles = str_replace(storage_path('app') . '/', '', 
+            array_filter(
+                glob(storage_path('app/**/*')), 
+                'is_file'
+            )
+        );
+        \Log::info('All files in storage:', ['files' => $allFiles]);
+
+        abort(404, 'File not found in any storage location');
+    })->name('uploads.view');
     // Certificates Management  
     Route::get('/certificates', function() { 
         return "Certificates management page coming soon in Phase 3"; 
@@ -51,4 +87,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/applicants', [\App\Http\Controllers\Admin\ApplicantController::class, 'index'])->name('applicants.index');
     Route::get('/applicants/{applicant}', [\App\Http\Controllers\Admin\ApplicantController::class, 'show'])->name('applicants.show');
+    Route::post('/applicants/{applicant}/start-verification', [\App\Http\Controllers\Admin\ApplicantController::class, 'startVerification'])->name('applicants.start-verification');
+    Route::post('/applicants/{applicant}/complete-verification', [\App\Http\Controllers\Admin\ApplicantController::class, 'completeVerification'])->name('applicants.complete-verification');
+    Route::post('/applicants/{applicant}/reject', [\App\Http\Controllers\Admin\ApplicantController::class, 'reject'])->name('applicants.reject');
+    Route::post('/applicants/{applicant}/generate-certificate', [\App\Http\Controllers\Admin\ApplicantController::class, 'generateCertificate'])->name('applicants.generate-certificate');
 });

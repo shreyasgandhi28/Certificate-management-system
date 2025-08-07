@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ApplicantSubmittedNotification;
+use App\Notifications\AdminNewSubmissionNotification;
 
 class FormController extends Controller
 {
@@ -63,31 +66,27 @@ class FormController extends Controller
 
             foreach ($uploadTypes as $uploadType) {
                 if ($request->hasFile($uploadType)) {
-                    $file = $request->file($uploadType);
+                    $files = $request->file($uploadType);
                     
-                    Log::info("Processing file upload: $uploadType");
-                    
-                    // Validate file
-                    $errors = $this->fileUploadService->validateFile($file);
-                    if (!empty($errors)) {
-                        throw new \Exception('File validation failed: ' . implode(', ', $errors));
+                    foreach ($files as $file) {
+                        Log::info("Processing file upload: $uploadType");
+                        
+                        // Validate file
+                        $errors = $this->fileUploadService->validateFile($file);
+                        if (!empty($errors)) {
+                            throw new \Exception('File validation failed: ' . implode(', ', $errors));
+                        }
+                        
+                        // Create new upload
+                        $upload = $this->fileUploadService->handleUpload(
+                            $file, 
+                            $applicant, 
+                            str_replace('_certificate', '', $uploadType)
+                        );
+                        
+                        Log::info("File uploaded successfully", ['upload_id' => $upload->id]);
+                        $uploadCount++;
                     }
-                    
-                    // Delete existing upload of this type
-                    $existingUpload = $applicant->getUploadByType(str_replace('_certificate', '', $uploadType));
-                    if ($existingUpload) {
-                        $this->fileUploadService->deleteUpload($existingUpload);
-                    }
-                    
-                    // Create new upload
-                    $upload = $this->fileUploadService->handleUpload(
-                        $file, 
-                        $applicant, 
-                        str_replace('_certificate', '', $uploadType)
-                    );
-                    
-                    Log::info("File uploaded successfully", ['upload_id' => $upload->id]);
-                    $uploadCount++;
                 }
             }
 
@@ -97,6 +96,16 @@ class FormController extends Controller
                 'applicant_id' => $applicant->id,
                 'uploads_count' => $uploadCount
             ]);
+
+            // Notify applicant and admin
+            Notification::route('mail', $applicant->email)
+                ->notify(new ApplicantSubmittedNotification($applicant));
+
+            // Send a basic admin notification to the first Super Admin
+            $admin = \App\Models\User::role('Super Admin')->first();
+            if ($admin) {
+                $admin->notify(new AdminNewSubmissionNotification($applicant));
+            }
 
             return redirect()
                 ->route('apply.success', $applicant->token)

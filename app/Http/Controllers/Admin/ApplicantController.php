@@ -3,8 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Applicant;
+use App\Models\AuditLog;
+use App\Models\Certificate;
+use App\Models\CertificateTemplate;
+use App\Services\CertificateService;
+use App\Models\Upload;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\CertificateGeneratedNotification;
 
 class ApplicantController extends Controller
 {
@@ -52,17 +60,20 @@ class ApplicantController extends Controller
         }
 
         // Start verification process
-        $applicant->status = 'pending_verification'; // Using 'pending_verification' instead of 'in_verification'
+        $applicant->status = 'in_verification';
         $applicant->verification_started_at = now();
         $applicant->verification_started_by = auth()->id();
         $applicant->save();
 
         // Create audit log
-        \App\Models\AuditLog::create([
+        AuditLog::create([
             'user_id' => auth()->id(),
-            'applicant_id' => $applicant->id,
             'action' => 'verification_started',
-            'details' => 'Started verification process'
+            'target_type' => Applicant::class,
+            'target_id' => $applicant->id,
+            'metadata' => ['details' => 'Started verification process'],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
         ]);
 
         return back()->with('success', 'Verification process started.');
@@ -75,6 +86,8 @@ class ApplicantController extends Controller
             'verification_notes' => 'nullable|string|max:1000'
         ]);
 
+        Log::info('Starting verification for applicant: ' . $applicant->id);
+
         // Update applicant status
         $applicant->update([
             'status' => 'verified',
@@ -83,13 +96,22 @@ class ApplicantController extends Controller
             'verification_notes' => $request->verification_notes
         ]);
 
+        // Update status of all uploads to verified
+        Upload::where('applicant_id', $applicant->id)->update(['verification_status' => 'verified']);
+        Log::info('Updated all uploads to verified for applicant ' . $applicant->id);
+
         // Create audit log
-        \App\Models\AuditLog::create([
+        AuditLog::create([
             'user_id' => auth()->id(),
-            'applicant_id' => $applicant->id,
             'action' => 'verification_completed',
-            'details' => 'Completed verification process'
+            'target_type' => Applicant::class,
+            'target_id' => $applicant->id,
+            'metadata' => ['notes' => $request->verification_notes],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
         ]);
+
+        Log::info('Verification complete for applicant: ' . $applicant->id);
 
         return back()->with('success', 'Application has been verified successfully.');
     }
@@ -101,6 +123,8 @@ class ApplicantController extends Controller
             'rejection_reason' => 'required|string|max:1000'
         ]);
 
+        Log::info('Starting rejection for applicant: ' . $applicant->id);
+
         // Update applicant status
         $applicant->update([
             'status' => 'rejected',
@@ -109,43 +133,97 @@ class ApplicantController extends Controller
             'rejection_reason' => $request->rejection_reason
         ]);
 
+        // Update status of all uploads to rejected
+        Upload::where('applicant_id', $applicant->id)->update(['verification_status' => 'rejected']);
+        Log::info('Updated all uploads to rejected for applicant ' . $applicant->id);
+
         // Create audit log
-        \App\Models\AuditLog::create([
+        AuditLog::create([
             'user_id' => auth()->id(),
-            'applicant_id' => $applicant->id,
             'action' => 'application_rejected',
-            'details' => 'Application rejected: ' . $request->rejection_reason
+            'target_type' => Applicant::class,
+            'target_id' => $applicant->id,
+            'metadata' => ['reason' => $request->rejection_reason],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
         ]);
+
+        Log::info('Rejection complete for applicant: ' . $applicant->id);
 
         return back()->with('success', 'Application has been rejected.');
     }
 
-    public function generateCertificate(Request $request, Applicant $applicant)
+    public function exportCsv(Request $request)
+    {
+        $filename = 'applicants_' . now()->format('Ymd_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($request) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['ID', 'Name', 'Email', 'Phone', 'Status', 'Submitted At', 'Verified At']);
+
+            $query = Applicant::query();
+            if ($name = $request->input('name')) $query->where('name', 'like', "%{$name}%");
+            if ($email = $request->input('email')) $query->where('email', 'like', "%{$email}%");
+            if ($status = $request->input('status')) $query->where('status', $status);
+            if ($date = $request->input('submitted_at')) $query->whereDate('submitted_at', $date);
+
+            $query->orderByDesc('id')->chunk(500, function ($rows) use ($handle) {
+                foreach ($rows as $a) {
+                    fputcsv($handle, [
+                        $a->id,
+                        $a->name,
+                        $a->email,
+                        $a->phone,
+                        $a->status,
+                        optional($a->submitted_at)?->toDateTimeString(),
+                        optional($a->verification_completed_at)?->toDateTimeString(),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+    public function generateCertificate(Request $request, Applicant $applicant, CertificateService $certificateService)
     {
         // Check if application is verified
         if ($applicant->status !== 'verified') {
             return back()->with('error', 'Certificates can only be generated for verified applications.');
         }
 
-        // Generate certificate
-        $certificate = \App\Models\Certificate::create([
-            'applicant_id' => $applicant->id,
-            'template_id' => $request->template_id,
-            'certificate_number' => 'CERT-' . str_pad($applicant->id, 6, '0', STR_PAD_LEFT),
-            'issued_at' => now(),
-            'issued_by' => auth()->id(),
-            'valid_until' => now()->addYears(5) // Example: 5-year validity
+        $request->validate([
+            'template_id' => 'required|exists:certificate_templates,id'
         ]);
+
+        $template = CertificateTemplate::findOrFail($request->input('template_id'));
+
+        $certificate = $certificateService->generateCertificate($applicant, $template, auth()->id());
 
         // Create audit log
-        \App\Models\AuditLog::create([
+        AuditLog::create([
             'user_id' => auth()->id(),
-            'applicant_id' => $applicant->id,
             'action' => 'certificate_generated',
-            'details' => 'Generated certificate: ' . $certificate->certificate_number
+            'target_type' => Applicant::class,
+            'target_id' => $applicant->id,
+            'metadata' => [
+                'certificate_id' => $certificate->id,
+                'serial_number' => $certificate->serial_number,
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
         ]);
 
-        return back()->with('success', 'Certificate has been generated successfully.');
+        // Notify applicant via email (queued)
+        Notification::route('mail', $applicant->email)
+            ->notify(new CertificateGeneratedNotification($certificate));
+
+        return back()->with('success', 'Certificate has been generated and emailed.');
     }
 }
 

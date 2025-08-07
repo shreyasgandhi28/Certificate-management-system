@@ -35,11 +35,11 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Get verification stats for uploads
-        $verificationStats = [
-            'pending' => Upload::where('verification_status', 'pending')->count(),
-            'verified' => Upload::where('verification_status', 'verified')->count(),
-            'rejected' => Upload::where('verification_status', 'rejected')->count(),
+        // Get application status stats for the donut chart
+        $applicationStatusStats = [
+            'pending' => $stats['pending_applications'],
+            'verified' => $stats['verified_applications'],
+            'rejected' => $stats['rejected_applications'],
         ];
 
         // Get recent applications
@@ -55,7 +55,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact(
             'stats',
             'monthlyData', 
-            'verificationStats',
+            'applicationStatusStats',
             'recentApplications'
         ));
     }

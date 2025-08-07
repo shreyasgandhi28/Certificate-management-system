@@ -139,6 +139,17 @@
             @endif
 
             <div class="overflow-x-auto">
+                <div class="flex items-center justify-end mb-2">
+                    <form method="GET" action="{{ route('admin.applicants.export') }}">
+                        <input type="hidden" name="name" value="{{ request('name') }}">
+                        <input type="hidden" name="email" value="{{ request('email') }}">
+                        <input type="hidden" name="phone" value="{{ request('phone') }}">
+                        <input type="hidden" name="status" value="{{ request('status') }}">
+                        <input type="hidden" name="submitted_at" value="{{ request('submitted_at') }}">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Export CSV</button>
+                    </form>
+                </div>
+
                 <table class="w-full">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700">

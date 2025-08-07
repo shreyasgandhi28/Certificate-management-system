@@ -1,4 +1,23 @@
 <!DOCTYPE html>
+<html lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }" x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Apply') - {{ config('app.name', 'Certificate Management') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="max-w-5xl mx-auto py-10 px-4">
+        <div class="flex justify-end mb-4">
+            <button @click="darkMode = !darkMode" class="px-3 py-1.5 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Toggle Dark</button>
+        </div>
+        @yield('content')
+    </div>
+</body>
+</html>
+
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">

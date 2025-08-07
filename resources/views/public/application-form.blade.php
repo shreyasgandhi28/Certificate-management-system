@@ -32,6 +32,18 @@
         @csrf
         <input type="hidden" name="token" value="{{ $token }}">
 
+        @if($errors->any())
+            <div class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline">Please fix the following errors:</span>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Personal Information Section -->
         <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-8">
             <div class="flex items-center space-x-3 mb-6">
@@ -148,85 +160,48 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 10th Certificate -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">10th Certificate</label>
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="mt-4">
-                                <input type="file" name="tenth_certificate" accept=".pdf,.jpg,.jpeg,.png" 
-                                       class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/50 dark:file:text-blue-300 dark:hover:file:bg-blue-900/70">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">PDF, PNG, JPG up to 5MB</p>
-                            </div>
-                        </div>
-                    </div>
-                    @error('tenth_certificate')
-                        <p class="text-red-500 text-sm">{{ $message }}</p>
-                    @enderror
-                </div>
+                @php
+                    $uploadTypes = [
+                        'tenth_certificate' => '10th Certificate',
+                        'twelfth_certificate' => '12th Certificate',
+                        'graduation_certificate' => 'Graduation Certificate',
+                        'masters_certificate' => 'Master\'s Certificate',
+                    ];
+                @endphp
 
-                <!-- 12th Certificate -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">12th Certificate</label>
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all">
+                @foreach($uploadTypes as $key => $label)
+                <div x-data="fileUpload('{{ $key }}')" class="space-y-3">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label }}</label>
+                    <div @dragover.prevent @drop.prevent="handleDrop($event)" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all" :class="{ 'border-blue-400': isDragging }">
                         <div class="text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <div class="mt-4">
-                                <input type="file" name="twelfth_certificate" accept=".pdf,.jpg,.jpeg,.png" 
-                                       class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/50 dark:file:text-blue-300 dark:hover:file:bg-blue-900/70">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">PDF, PNG, JPG up to 5MB</p>
+                                <input type="file" name="{{ $key }}[]" @change="handleFileSelect($event)" multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden" id="{{ $key }}">
+                                <label for="{{ $key }}" class="cursor-pointer text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline">Upload files</label>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">or drag and drop</p>
                             </div>
                         </div>
                     </div>
-                    @error('twelfth_certificate')
-                        <p class="text-red-500 text-sm">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Graduation Certificate -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Graduation Certificate</label>
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="mt-4">
-                                <input type="file" name="graduation_certificate" accept=".pdf,.jpg,.jpeg,.png" 
-                                       class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/50 dark:file:text-blue-300 dark:hover:file:bg-blue-900/70">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">PDF, PNG, JPG up to 5MB</p>
+                    <div x-show="files.length > 0" class="space-y-2">
+                        <template x-for="(file, index) in files" :key="index">
+                            <div class="flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center space-x-2">
+                                    <img :src="file.preview" class="w-8 h-8 rounded-md object-cover">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300" x-text="file.name"></span>
+                                </div>
+                                <button @click.prevent="removeFile(index)" class="text-red-500 hover:text-red-700">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L11.414 10l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z"></path></svg>
+                                </button>
                             </div>
-                        </div>
+                        </template>
                     </div>
-                    @error('graduation_certificate')
+                    @error($key)
                         <p class="text-red-500 text-sm">{{ $message }}</p>
                     @enderror
                 </div>
-
-                <!-- Masters Certificate -->
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Master's Certificate</label>
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="mt-4">
-                                <input type="file" name="masters_certificate" accept=".pdf,.jpg,.jpeg,.png" 
-                                       class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/50 dark:file:text-blue-300 dark:hover:file:bg-blue-900/70">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">PDF, PNG, JPG up to 5MB</p>
-                            </div>
-                        </div>
-                    </div>
-                    @error('masters_certificate')
-                        <p class="text-red-500 text-sm">{{ $message }}</p>
-                    @enderror
-                </div>
+                @endforeach
             </div>
         </div>
 
@@ -257,6 +232,30 @@
 function applicationForm() {
     return {
         // Form functionality
+    }
+}
+
+function fileUpload(name) {
+    return {
+        files: [],
+        isDragging: false,
+        handleFileSelect(event) {
+            this.addFiles(event.target.files);
+        },
+        handleDrop(event) {
+            this.isDragging = false;
+            this.addFiles(event.dataTransfer.files);
+        },
+        addFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                file.preview = URL.createObjectURL(file);
+                this.files.push(file);
+            }
+        },
+        removeFile(index) {
+            this.files.splice(index, 1);
+        }
     }
 }
 </script>

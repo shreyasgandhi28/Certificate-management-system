@@ -92,14 +92,14 @@
             <!-- Donut Chart - Right Side -->
             <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold card-text-primary">Verification Status</h3>
-                    <p class="card-text-secondary text-sm">Document status breakdown</p>
+                    <h3 class="text-lg font-semibold card-text-primary">Application Status</h3>
+                    <p class="card-text-secondary text-sm">Application status breakdown</p>
                 </div>
                 
                 <!-- Chart centered -->
                 <div class="flex justify-center mb-6">
                     <div style="height: 200px; width: 200px; position: relative;">
-                        <canvas id="verificationChart"></canvas>
+                        <canvas id="applicationStatusChart"></canvas>
                     </div>
                 </div>
 
@@ -110,21 +110,21 @@
                             <div class="legend-dot-pending"></div>
                             <span class="text-sm font-medium card-text-primary">Pending</span>
                         </div>
-                        <span class="text-sm font-bold card-text-primary">{{ $verificationStats['pending'] }}</span>
+                        <span class="text-sm font-bold card-text-primary">{{ $applicationStatusStats['pending'] }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2">
                         <div class="flex items-center">
                             <div class="legend-dot-verified"></div>
                             <span class="text-sm font-medium card-text-primary">Verified</span>
                         </div>
-                        <span class="text-sm font-bold card-text-primary">{{ $verificationStats['verified'] }}</span>
+                        <span class="text-sm font-bold card-text-primary">{{ $applicationStatusStats['verified'] }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2">
                         <div class="flex items-center">
                             <div class="legend-dot-rejected"></div>
                             <span class="text-sm font-medium card-text-primary">Rejected</span>
                         </div>
-                        <span class="text-sm font-bold card-text-primary">{{ $verificationStats['rejected'] }}</span>
+                        <span class="text-sm font-bold card-text-primary">{{ $applicationStatusStats['rejected'] }}</span>
                     </div>
                 </div>
             </div>
@@ -298,17 +298,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Donut Chart
-    const verificationCtx = document.getElementById('verificationChart');
-    if (verificationCtx) {
-        new Chart(verificationCtx, {
+    const applicationStatusCtx = document.getElementById('applicationStatusChart');
+    if (applicationStatusCtx) {
+        new Chart(applicationStatusCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Pending', 'Verified', 'Rejected'],
                 datasets: [{
                     data: [
-                        @json($verificationStats['pending']),
-                        @json($verificationStats['verified']),
-                        @json($verificationStats['rejected'])
+                        @json($applicationStatusStats['pending']),
+                        @json($applicationStatusStats['verified']),
+                        @json($applicationStatusStats['rejected'])
                     ],
                     backgroundColor: ['#fbbf24', '#10b981', '#ef4444'],
                     borderWidth: 0

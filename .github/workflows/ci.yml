@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Copy env
+        run: cp .env.example .env || true
+      - name: Generate app key
+        run: php artisan key:generate
+      - name: Prepare SQLite DB
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+      - name: Migrate
+        run: php artisan migrate --graceful --no-interaction
+      - name: Lint
+        run: vendor/bin/pint -v || true
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+

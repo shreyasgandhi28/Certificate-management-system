@@ -18,7 +18,7 @@ class FileUploadService
         $storedName = Str::uuid() . '.' . $extension;
         
         // Define upload path
-        $uploadPath = 'public/uploads/' . $applicant->id . '/' . $type;
+        $uploadPath = 'uploads/' . $applicant->id . '/' . $type;
         
         // Store file
         $filePath = $file->storeAs($uploadPath, $storedName, 'public');
@@ -30,7 +30,7 @@ class FileUploadService
             'original_filename' => $originalName,
             'stored_filename' => $storedName,
             'file_path' => $filePath,
-            'file_hash' => hash_file('sha256', Storage::path($filePath)),
+            'file_hash' => hash_file('sha256', Storage::disk('public')->path($filePath)),
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
             'verification_status' => 'pending',

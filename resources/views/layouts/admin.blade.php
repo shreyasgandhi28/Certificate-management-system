@@ -27,12 +27,12 @@
         
         /* Sidebar structure with proper toggle */
         .sidebar-container {
-            width: 256px;
+            width: 280px;
             height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 50;
+            z-index: 100;
             display: flex;
             flex-direction: column;
             background-color: #ffffff;
@@ -47,11 +47,13 @@
         
         /* Main content that adapts to sidebar state */
         .main-content {
-            margin-left: 256px;
+            margin-left: 280px;
             min-height: 100vh;
             transition: margin-left 0.3s ease;
             background-color: #f9fafb;
             color: #111827;
+            position: relative;
+            z-index: 1;
         }
         
         .main-content.expanded {
@@ -69,17 +71,65 @@
             color: #f9fafb !important;
         }
         
-        /* Top bar */
+        /* Modern Top Bar Design */
         .topbar {
-            background-color: #ffffff;
-            border-color: #e5e7eb;
-            color: #111827;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+            color: #ffffff;
+            position: relative;
+            overflow: visible;
+            z-index: 10;
+        }
+        
+        .topbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            pointer-events: none;
         }
         
         .dark .topbar {
-            background-color: #1f2937 !important;
-            border-color: #374151 !important;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+            box-shadow: 0 4px 20px rgba(30, 41, 59, 0.3) !important;
             color: #f9fafb !important;
+        }
+        
+        .dark .topbar::before {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        }
+        
+        /* Modern Sidebar Header Design */
+        .sidebar-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .dark .sidebar-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .dark .sidebar-header::before {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
         }
         
         /* Text contrast classes */
@@ -101,6 +151,7 @@
         
         .nav-link {
             color: #374151 !important;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
         
         .dark .nav-link {
@@ -190,6 +241,155 @@
             font-weight: 700 !important;
         }
         
+        /* Modern Company Logo Styling */
+        .sidebar-logo-container {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-logo-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+            pointer-events: none;
+        }
+        
+        .sidebar-logo-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .sidebar-logo-svg {
+            width: 48px;
+            height: 48px;
+            filter: brightness(0) invert(1);
+            transition: all 0.3s ease;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Light mode - normal logo */
+        .sidebar-logo-svg {
+            filter: brightness(0) invert(1);
+        }
+        
+        /* Dark mode - make logo white/visible */
+        .dark .sidebar-logo-svg {
+            filter: brightness(0) invert(1);
+        }
+        
+        /* Enhanced Button Styles for Better Visibility */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+            color: #ffffff !important;
+            border: 1px solid #2563eb !important;
+            box-shadow: 0 1px 3px 0 rgba(37, 99, 235, 0.1), 0 1px 2px 0 rgba(37, 99, 235, 0.06) !important;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+            border-color: #1d4ed8 !important;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06) !important;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: #ffffff !important;
+            border: 1px solid #059669 !important;
+            box-shadow: 0 1px 3px 0 rgba(16, 185, 129, 0.1), 0 1px 2px 0 rgba(16, 185, 129, 0.06) !important;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857) !important;
+            border-color: #047857 !important;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06) !important;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: #ffffff !important;
+            border: 1px solid #dc2626 !important;
+            box-shadow: 0 1px 3px 0 rgba(239, 68, 68, 0.1), 0 1px 2px 0 rgba(239, 68, 68, 0.06) !important;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+            border-color: #b91c1c !important;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1), 0 2px 4px -1px rgba(239, 68, 68, 0.06) !important;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            color: #ffffff !important;
+            border: 1px solid #d97706 !important;
+            box-shadow: 0 1px 3px 0 rgba(245, 158, 11, 0.1), 0 1px 2px 0 rgba(245, 158, 11, 0.06) !important;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #d97706, #b45309) !important;
+            border-color: #b45309 !important;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06) !important;
+        }
+        
+        .btn-purple {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+            color: #ffffff !important;
+            border: 1px solid #7c3aed !important;
+            box-shadow: 0 1px 3px 0 rgba(139, 92, 246, 0.1), 0 1px 2px 0 rgba(139, 92, 246, 0.06) !important;
+        }
+        
+        .btn-purple:hover {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+            border-color: #6d28d9 !important;
+            box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1), 0 2px 4px -1px rgba(139, 92, 246, 0.06) !important;
+        }
+        
+        /* Dark mode button adjustments */
+        .dark .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+            border-color: #1d4ed8 !important;
+        }
+        
+        .dark .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+            border-color: #1e40af !important;
+        }
+        
+        .dark .btn-success {
+            background: linear-gradient(135deg, #10b981, #047857) !important;
+            border-color: #047857 !important;
+        }
+        
+        .dark .btn-success:hover {
+            background: linear-gradient(135deg, #047857, #065f46) !important;
+            border-color: #065f46 !important;
+        }
+        
+        .dark .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+            border-color: #b91c1c !important;
+        }
+        
+        .dark .btn-danger:hover {
+            background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
+            border-color: #991b1b !important;
+        }
+        
         /* Chart legend colors */
         .legend-dot-pending {
             background-color: #fbbf24 !important;
@@ -236,26 +436,26 @@
         @click.away="false"
     >
         <!-- Sidebar Header -->
-        <div class="flex items-center justify-between h-16 px-6 bg-blue-600 flex-shrink-0">
+        <div class="flex items-center justify-between h-24 px-6 sidebar-header flex-shrink-0">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-                        <path d="M14 2v6h6"/>
-                        <path d="M16 13H8"/>
-                        <path d="M16 17H8"/>
-                        <path d="M10 9H8"/>
-                    </svg>
+                    <div class="sidebar-logo-container">
+                        <img 
+                            src="{{ asset('images/logo_light.svg') }}"
+                            alt="Users Software Systems Logo"
+                            class="sidebar-logo-svg"
+                        />
+                    </div>
                 </div>
-                <div class="ml-3">
-                    <h1 class="text-lg font-semibold text-white">Certificate Manager</h1>
+                <div class="ml-3 flex-1 relative z-10">
+                    <h1 class="text-xl font-bold text-gray-800 dark:text-white leading-tight">Certificate Manager</h1>
                 </div>
             </div>
             
             <!-- Close button for mobile only -->
             <button 
                 @click="sidebarOpen = false" 
-                class="lg:hidden p-2 rounded-lg text-white hover:bg-white/20 transition-colors"
+                class="lg:hidden p-2 rounded-lg text-secondary hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -341,23 +541,23 @@
     <!-- Main Content with Fixed Click Handling -->
     <div :class="sidebarOpen ? 'main-content' : 'main-content expanded'">
         <!-- Top Header with WORKING Hamburger -->
-        <div class="topbar shadow-sm border-b">
+        <div class="topbar">
             <div class="px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <!-- WORKING Hamburger Menu -->
                         <button 
                             @click.stop="sidebarOpen = !sidebarOpen" 
-                            class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            class="p-2 rounded-lg bg-white/20 dark:bg-gray-700 hover:bg-white/30 dark:hover:bg-gray-600 transition-colors"
                         >
-                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-white dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
                         </button>
                         
-                        <div>
-                            <h1 class="text-2xl font-bold text-primary">@yield('page-title', 'Dashboard')</h1>
-                            <p class="text-sm text-secondary">@yield('page-description', 'Manage your certificate applications')</p>
+                        <div class="relative z-10">
+                            <h1 class="text-2xl font-bold text-white dark:text-primary">@yield('page-title', 'Dashboard')</h1>
+                            <p class="text-sm text-white/80 dark:text-secondary">@yield('page-description', 'Manage your certificate applications')</p>
                         </div>
                     </div>
                     
@@ -366,9 +566,9 @@
                         <!-- FIXED Dark Mode Toggle -->
                         <button 
                             @click.stop="darkMode = !darkMode" 
-                            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 dark:bg-gray-700 hover:bg-white/30 dark:hover:bg-gray-600 transition-colors"
                         >
-                            <svg x-show="!darkMode" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg x-show="!darkMode" class="w-5 h-5 text-white dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
                             </svg>
                             <svg x-show="darkMode" class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,16 +580,16 @@
                         <div class="relative" x-data="{ open: false }">
                             <button 
                                 @click.stop="open = !open" 
-                                class="flex items-center text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 p-2 transition-colors"
+                                class="flex items-center text-sm rounded-lg hover:bg-white/20 dark:hover:bg-gray-700 p-2 transition-colors"
                             >
                                 <div class="w-8 h-8 user-initials rounded-full flex items-center justify-center mr-3">
                                     <span class="text-xs font-bold">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span>
                                 </div>
                                 <div class="text-left hidden sm:block">
-                                    <div class="text-sm font-medium text-primary">{{ auth()->user()->name }}</div>
-                                    <div class="text-xs text-secondary">Administrator</div>
+                                    <div class="text-sm font-medium text-white dark:text-primary">{{ auth()->user()->name }}</div>
+                                    <div class="text-xs text-white/80 dark:text-secondary">Administrator</div>
                                 </div>
-                                <svg class="ml-2 h-4 w-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="ml-2 h-4 w-4 text-white/80 dark:text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -400,6 +600,7 @@
                                 @click.away="open = false" 
                                 x-transition 
                                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 z-50"
+                                style="z-index: 1000;"
                             >
                                 <div class="py-1">
                                     <a href="#" @click.stop class="group flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-700">Profile</a>
@@ -419,7 +620,7 @@
         </div>
 
         <!-- Page Content -->
-        <main class="flex-1">
+        <main class="flex-1 relative z-1 pt-6 px-6">
             @yield('content')
         </main>
     </div>

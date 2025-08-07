@@ -22,13 +22,24 @@ class Applicant extends Model
         'status',
         'educational_details',
         'notes',
-        'submitted_at'
+        'submitted_at',
+        'verification_started_at',
+        'verification_started_by',
+        'verification_completed_at',
+        'verification_completed_by',
+        'verification_notes',
+        'rejected_at',
+        'rejected_by',
+        'rejection_reason',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
         'educational_details' => 'array',
-        'submitted_at' => 'datetime'
+        'submitted_at' => 'datetime',
+        'verification_started_at' => 'datetime',
+        'verification_completed_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     protected static function boot()

@@ -114,18 +114,18 @@
         
         /* Card styling */
         .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(18px);
+            border: 0; /* Remove white border in light mode */
+            border-radius: 22px;
+            box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.25);
             position: relative;
             z-index: 10;
         }
         
         .dark .login-card {
-            background: rgba(17, 24, 39, 0.95);
-            border: 1px solid rgba(75, 85, 99, 0.2);
+            background: rgba(17, 24, 39, 0.92);
+            border: 1px solid rgba(75, 85, 99, 0.25);
         }
         
         /* Enhanced brand panel */

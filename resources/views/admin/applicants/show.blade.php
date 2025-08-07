@@ -85,6 +85,17 @@
                                 <a href="{{ route('admin.uploads.view', $upload) }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">
                                     View
                                 </a>
+                                @if($applicant->status === 'in_verification')
+                                <form action="{{ route('admin.uploads.verify', $upload) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button class="px-2 py-1 text-xs rounded btn-success" title="Mark Verified">Verify</button>
+                                </form>
+                                <form action="{{ route('admin.uploads.reject', $upload) }}" method="POST" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="verification_comments" value="Rejected by verifier">
+                                    <button class="px-2 py-1 text-xs rounded btn-danger" title="Reject">Reject</button>
+                                </form>
+                                @endif
                             </div>
                         </div>
                     @endforeach
@@ -138,7 +149,7 @@
         <!-- Action Buttons -->
         <div class="flex flex-wrap gap-4">
             <a href="{{ route('admin.applicants.index') }}" 
-               class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors">
+               class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -148,7 +159,7 @@
             @if($applicant->status === 'pending')
                 <form action="{{ route('admin.applicants.start-verification', $applicant) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 btn-primary text-sm font-medium rounded-lg transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                         </svg>
@@ -160,18 +171,21 @@
             @if($applicant->status === 'in_verification')
                 <form action="{{ route('admin.applicants.complete-verification', $applicant) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <div class="flex items-center gap-2">
+                        <input type="text" name="verification_notes" placeholder="Notes (optional)" class="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 btn-success text-sm font-medium rounded-lg transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                         Complete Verification
-                    </button>
+                        </button>
+                    </div>
                 </form>
 
                 <button type="button" 
                         x-data="" 
                         x-on:click="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reject-modal' }))"
-                        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        class="inline-flex items-center px-4 py-2 btn-danger text-sm font-medium rounded-lg transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -180,9 +194,14 @@
             @endif
 
             @if($applicant->status === 'verified')
-                <form action="{{ route('admin.applicants.generate-certificate', $applicant) }}" method="POST" class="inline">
+                <form action="{{ route('admin.applicants.generate-certificate', $applicant) }}" method="POST" class="inline flex items-center gap-2">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <select name="template_id" class="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                        @foreach(\App\Models\CertificateTemplate::where('active', true)->get() as $template)
+                            <option value="{{ $template->id }}">{{ $template->name }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 btn-purple text-sm font-medium rounded-lg transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -193,19 +212,17 @@
         </div>
 
         <!-- Verification Notes -->
-        @if($applicant->status === 'in_verification')
-            <div class="mt-4">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Verification Notes</h4>
-                <textarea name="verification_notes" rows="3" 
-                          class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300"
-                          placeholder="Add notes about the verification process..."></textarea>
+            @if($applicant->verification_notes)
+            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <h4 class="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">Verification Notes</h4>
+                <p class="text-sm text-blue-700 dark:text-blue-400">{{ $applicant->verification_notes }}</p>
             </div>
         @endif
 
         <!-- Rejection Reason (if rejected) -->
-        @if($applicant->status === 'rejected')
+        @if($applicant->status === 'rejected' && $applicant->rejection_reason)
             <div class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <h4 class="text-sm font-medium text-red-800 dark:text-red-300 mb-2">Rejection Reason</h4>
+                <h4 class="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">Rejection Reason</h4>
                 <p class="text-sm text-red-700 dark:text-red-400">{{ $applicant->rejection_reason }}</p>
             </div>
         @endif
@@ -279,5 +296,6 @@
             </div>
         </div>
     </div>
-</div>
 @endsection
+
+

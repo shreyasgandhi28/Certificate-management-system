@@ -17,75 +17,44 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Public Application Routes
-Route::prefix('apply')->name('apply.')->group(function () {
+// Public Application Routes (basic throttling)
+Route::prefix('apply')->name('apply.')->middleware('throttle:30,1')->group(function () {
     Route::get('/', [App\Http\Controllers\Public\FormController::class, 'create'])->name('create');
     Route::get('/{token}', [App\Http\Controllers\Public\FormController::class, 'show'])->name('show');
-    Route::post('/', [App\Http\Controllers\Public\FormController::class, 'store'])->name('store');
+    Route::post('/', [App\Http\Controllers\Public\FormController::class, 'store'])->middleware('throttle:5,1')->name('store');
     Route::get('/{token}/success', [App\Http\Controllers\Public\FormController::class, 'success'])->name('success');
 });
 
 require __DIR__.'/auth.php';
 
-// Admin Routes (protected by auth middleware)
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+// Admin Routes (protected by auth + role)
+Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/applicant-stats', [App\Http\Controllers\Admin\DashboardController::class, 'applicantStats'])->name('applicant-stats');
     // Documents/Uploads Management
-    Route::get('/uploads', function() { 
-        $uploads = \App\Models\Upload::with('applicant')->latest()->paginate(15);
-        return view('admin.uploads.index', compact('uploads')); 
-    })->name('uploads.index');
-    Route::get('/uploads/{upload}/view', function(\App\Models\Upload $upload) {
-        \Log::info('View request for upload:', [
-            'upload_id' => $upload->id,
-            'file_path' => $upload->file_path,
-            'stored_filename' => $upload->stored_filename
-        ]);
-
-        // Check all possible locations
-        $locations = [
-            storage_path('app/public/uploads/' . $upload->applicant_id . '/' . $upload->type . '/' . $upload->stored_filename),
-            storage_path('app/' . $upload->file_path),
-            storage_path('app/private/' . $upload->file_path),
-            storage_path('app/private/uploads/' . $upload->applicant_id . '/' . $upload->type . '/' . $upload->stored_filename)
-        ];
-
-        \Log::info('Checking locations:', ['locations' => $locations]);
-
-        foreach ($locations as $location) {
-            \Log::info('Checking location: ' . $location);
-            if (file_exists($location)) {
-                \Log::info('File found at: ' . $location);
-                return response()->file($location);
-            }
-        }
-
-        // Get all files in storage for debugging
-        $allFiles = str_replace(storage_path('app') . '/', '', 
-            array_filter(
-                glob(storage_path('app/**/*')), 
-                'is_file'
-            )
-        );
-        \Log::info('All files in storage:', ['files' => $allFiles]);
-
-        abort(404, 'File not found in any storage location');
-    })->name('uploads.view');
+    Route::get('/uploads', [App\Http\Controllers\Admin\UploadController::class, 'index'])->name('uploads.index');
+    Route::get('/uploads/{upload}/view', [App\Http\Controllers\Admin\UploadController::class, 'view'])->name('uploads.view');
+    Route::post('/uploads/{upload}/verify', [App\Http\Controllers\Admin\UploadController::class, 'verify'])->name('uploads.verify');
+    Route::post('/uploads/{upload}/reject', [App\Http\Controllers\Admin\UploadController::class, 'reject'])->name('uploads.reject');
     // Certificates Management  
     Route::get('/certificates', function() { 
-        return "Certificates management page coming soon in Phase 3"; 
+        $certificates = \App\Models\Certificate::with(['applicant','template'])->latest()->paginate(15);
+        return view('admin.certificates.index', compact('certificates'));
     })->name('certificates.index');
+    Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\Admin\CertificateController::class, 'download'])->name('certificates.download');
+    Route::post('/certificates/{certificate}/send-email', [\App\Http\Controllers\Admin\CertificateController::class, 'sendEmail'])->name('certificates.send-email');
+    Route::post('/certificates/{certificate}/send-whatsapp', [\App\Http\Controllers\Admin\CertificateController::class, 'sendWhatsApp'])->name('certificates.send-whatsapp');
+    Route::post('/certificates/{certificate}/reset', [\App\Http\Controllers\Admin\CertificateController::class, 'resetStatus'])->name('certificates.reset-status');
     // Users Management
-    Route::get('/users', function() { 
-        return "Users management page coming soon in Phase 3"; 
-    })->name('users.index');
+    Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::post('/users/{user}/roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.update-roles');
 });
 
 
-// Applicants Management
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+// Applicants Management (protected by auth + role)
+Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/applicants', [\App\Http\Controllers\Admin\ApplicantController::class, 'index'])->name('applicants.index');
+    Route::get('/applicants-export', [\App\Http\Controllers\Admin\ApplicantController::class, 'exportCsv'])->name('applicants.export');
     Route::get('/applicants/{applicant}', [\App\Http\Controllers\Admin\ApplicantController::class, 'show'])->name('applicants.show');
     Route::post('/applicants/{applicant}/start-verification', [\App\Http\Controllers\Admin\ApplicantController::class, 'startVerification'])->name('applicants.start-verification');
     Route::post('/applicants/{applicant}/complete-verification', [\App\Http\Controllers\Admin\ApplicantController::class, 'completeVerification'])->name('applicants.complete-verification');

@@ -36,11 +36,8 @@ Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->pref
     Route::get('/uploads/{upload}/view', [App\Http\Controllers\Admin\UploadController::class, 'view'])->name('uploads.view');
     Route::post('/uploads/{upload}/verify', [App\Http\Controllers\Admin\UploadController::class, 'verify'])->name('uploads.verify');
     Route::post('/uploads/{upload}/reject', [App\Http\Controllers\Admin\UploadController::class, 'reject'])->name('uploads.reject');
-    // Certificates Management  
-    Route::get('/certificates', function() { 
-        $certificates = \App\Models\Certificate::with(['applicant','template'])->latest()->paginate(15);
-        return view('admin.certificates.index', compact('certificates'));
-    })->name('certificates.index');
+    // Certificates Management
+    Route::get('/certificates', [\App\Http\Controllers\Admin\CertificateController::class, 'index'])->name('certificates.index');
     Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\Admin\CertificateController::class, 'download'])->name('certificates.download');
     Route::post('/certificates/{certificate}/send-email', [\App\Http\Controllers\Admin\CertificateController::class, 'sendEmail'])->name('certificates.send-email');
     Route::post('/certificates/{certificate}/send-whatsapp', [\App\Http\Controllers\Admin\CertificateController::class, 'sendWhatsApp'])->name('certificates.send-whatsapp');

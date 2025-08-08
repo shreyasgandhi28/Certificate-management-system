@@ -39,6 +39,7 @@
             color: #111827;
             transform: translateX(0);
             transition: transform 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
         }
         
         .sidebar-container.hidden {
@@ -75,11 +76,17 @@
         .topbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             color: #ffffff;
-            position: relative;
-            overflow: visible;
-            z-index: 10;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 30;
+            height: 4.5rem;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
         }
         
         .topbar::before {
@@ -105,11 +112,11 @@
         
         /* Modern Sidebar Header Design */
         .sidebar-header {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: relative;
-            overflow: hidden;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            height: 4.5rem;
         }
         
         .sidebar-header::before {
@@ -431,36 +438,22 @@
 
     <!-- WORKING Sidebar with Fixed Click Handling -->
     <div 
-        :class="sidebarOpen ? 'sidebar-container open' : 'sidebar-container hidden'"
-        class="shadow-xl border-r border-custom"
-        @click.away="false"
+        x-show="sidebarOpen || window.innerWidth >= 1024" 
+        @click.away="if (window.innerWidth < 1024) sidebarOpen = false"
+        class="sidebar-container bg-white dark:bg-gray-800" 
+        :class="{ 'hidden': !sidebarOpen }"
     >
         <!-- Sidebar Header -->
-        <div class="flex items-center justify-between h-24 px-6 sidebar-header flex-shrink-0">
+        <div class="sidebar-header">
             <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="sidebar-logo-container">
-                        <img 
-                            src="{{ asset('images/logo_light.svg') }}"
-                            alt="Users Software Systems Logo"
-                            class="sidebar-logo-svg"
-                        />
-                    </div>
+                <div class="flex-shrink-0 flex items-center">
+                    <x-application-logo class="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <div class="ml-3 flex-1 relative z-10">
-                    <h1 class="text-xl font-bold text-gray-800 dark:text-white leading-tight">Certificate Manager</h1>
+                <div class="ml-3">
+                    <h1 class="text-lg font-semibold text-gray-900 dark:text-white">Certificate Manager</h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Admin Dashboard</p>
                 </div>
             </div>
-            
-            <!-- Close button for mobile only -->
-            <button 
-                @click="sidebarOpen = false" 
-                class="lg:hidden p-2 rounded-lg text-secondary hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
         </div>
 
         <!-- User Info -->
@@ -542,19 +535,19 @@
     <div :class="sidebarOpen ? 'main-content' : 'main-content expanded'">
         <!-- Top Header with WORKING Hamburger -->
         <div class="topbar">
-            <div class="px-6 py-4">
+            <div class="w-full">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <!-- WORKING Hamburger Menu -->
                         <button 
                             @click.stop="sidebarOpen = !sidebarOpen" 
-                            class="p-2 rounded-lg bg-white/20 dark:bg-gray-700 hover:bg-white/30 dark:hover:bg-gray-600 transition-colors"
+                            class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white transition-colors duration-200"
+                            aria-label="Toggle sidebar"
                         >
-                            <svg class="w-5 h-5 text-white dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        
                         <div class="relative z-10">
                             <h1 class="text-2xl font-bold text-white dark:text-primary">@yield('page-title', 'Dashboard')</h1>
                             <p class="text-sm text-white/80 dark:text-secondary">@yield('page-description', 'Manage your certificate applications')</p>

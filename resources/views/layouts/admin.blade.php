@@ -445,15 +445,9 @@
         :class="{ 'hidden': !sidebarOpen }"
     >
         <!-- Sidebar Header -->
-        <div class="sidebar-header">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <x-application-logo class="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <div class="ml-3">
-                    <h1 class="text-lg font-semibold text-gray-900 dark:text-white">Certificate Manager</h1>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Admin Dashboard</p>
-                </div>
+        <div class="sidebar-header py-4">
+            <div class="flex items-center justify-center">
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">Certificate Manager</h1>
             </div>
         </div>
 

@@ -1,11 +1,15 @@
 @extends('layouts.admin')
+
+@section('title', 'Applicants')
+@section('page-title', 'Applicant Management')
+@section('page-description', 'View and manage certificate applications')
+
 @section('content')
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-2 sm:px-4" x-data="{ showFilter: false }" @keydown.escape.window="showFilter = false">
-    <div class="w-full">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6" x-data="{ showFilter: false }" @keydown.escape.window="showFilter = false">
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-lg font-semibold card-text-primary">Applicants</h1>
-                
+
+                <div class="flex items-center gap-3">
                 <!-- Filter Button -->
                 <div class="relative inline-block" x-data="{ showFilter: false }">
                     <button @click="showFilter = !showFilter" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-all">
@@ -94,6 +98,13 @@
                                     </div>
                                 </div>
 
+                                <!-- Application ID -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Application ID</label>
+                                    <input type="number" name="id" value="{{ request('id') }}" placeholder="e.g. 5"
+                                           class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
+                                </div>
+
                                 <!-- Date Filter -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Submitted Date</label>
@@ -116,12 +127,28 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Export CSV Button (visible in both themes) -->
+                <form method="GET" action="{{ route('admin.applicants.export') }}">
+                    <input type="hidden" name="name" value="{{ request('name') }}">
+                    <input type="hidden" name="email" value="{{ request('email') }}">
+                    <input type="hidden" name="phone" value="{{ request('phone') }}">
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                    <input type="hidden" name="submitted_at" value="{{ request('submitted_at') }}">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                        Export CSV
+                    </button>
+                </form>
+                </div>
             </div>
 
             <!-- Active Filters Display -->
-            @if(request()->hasAny(['name','email','phone','status','submitted_at']))
+            @if(request()->hasAny(['name','email','phone','status','submitted_at','id']))
             <div class="flex flex-wrap items-center gap-2 mb-4">
-                @foreach(['name'=>'Name','email'=>'Email','phone'=>'Phone','status'=>'Status','submitted_at'=>'Date'] as $key=>$label)
+                @foreach(['name'=>'Name','email'=>'Email','phone'=>'Phone','status'=>'Status','submitted_at'=>'Date','id'=>'Application ID'] as $key=>$label)
                     @if(request($key))
                         <span class="inline-flex items-center px-3 py-1.5 text-sm bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 rounded-lg">
                             <span class="font-medium">{{ $label }}:</span>
@@ -139,20 +166,14 @@
             @endif
 
             <div class="overflow-x-auto">
-                <div class="flex items-center justify-end mb-2">
-                    <form method="GET" action="{{ route('admin.applicants.export') }}">
-                        <input type="hidden" name="name" value="{{ request('name') }}">
-                        <input type="hidden" name="email" value="{{ request('email') }}">
-                        <input type="hidden" name="phone" value="{{ request('phone') }}">
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                        <input type="hidden" name="submitted_at" value="{{ request('submitted_at') }}">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Export CSV</button>
-                    </form>
-                </div>
 
+                <form method="GET" action="{{ route('admin.applicants.export') }}" id="bulkExportForm">
+                    <input type="hidden" name="ids" id="bulkIds">
+                </form>
                 <table class="w-full">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <th class="text-left py-3 px-4"><input type="checkbox" id="selectAll"></th>
                             <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Applicant</th>
                             <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Email</th>
                             <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Documents</th>
@@ -164,6 +185,7 @@
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($applicants as $applicant)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="py-4 px-4"><input type="checkbox" class="rowChk" value="{{ $applicant->id }}"></td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
@@ -182,7 +204,7 @@
                                 </span>
                             </td>
                             <td class="py-4 px-4">
-                                @if($applicant->status === 'pending')
+                                @if($applicant->status === 'pending' || $applicant->status === 'in_verification')
                                     <div class="flex items-center">
                                         <div class="legend-dot-pending"></div>
                                         <span class="text-sm font-medium card-text-primary">Pending</span>
@@ -205,6 +227,10 @@
                             </td>
                             <td class="py-4 px-4">
                                 <a href="{{ route('admin.applicants.show', $applicant) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View</a>
+                                @if(auth()->user()->hasAnyRole(['Super Admin','Certificate Issuer']))
+                                    <span class="mx-1 text-gray-300">|</span>
+                                    <a href="{{ route('admin.applicants.edit', $applicant) }}" class="text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white font-medium">Edit</a>
+                                @endif
                             </td>
                         </tr>
                         @empty
@@ -220,6 +246,19 @@
                         @endforelse
                     </tbody>
                 </table>
+                <div class="mt-3 flex justify-end">
+                    <button type="button" onclick="submitBulkExport()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Export Selected</button>
+                </div>
+                <script>
+                function submitBulkExport(){
+                    const ids = Array.from(document.querySelectorAll('.rowChk:checked')).map(el => el.value).join(',');
+                    document.getElementById('bulkIds').value = ids;
+                    document.getElementById('bulkExportForm').submit();
+                }
+                document.getElementById('selectAll')?.addEventListener('change', e => {
+                    document.querySelectorAll('.rowChk').forEach(cb => cb.checked = e.target.checked);
+                });
+                </script>
             </div>
             <div class="mt-4">
                 {{ $applicants->links() }}

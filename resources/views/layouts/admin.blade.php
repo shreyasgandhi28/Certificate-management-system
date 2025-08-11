@@ -27,7 +27,7 @@
         
         /* Sidebar structure with proper toggle */
         .sidebar-container {
-            width: 280px;
+            width: 240px;
             height: 100vh;
             position: fixed;
             top: 0;
@@ -48,13 +48,14 @@
         
         /* Main content that adapts to sidebar state */
         .main-content {
-            margin-left: 280px;
+            margin-left: 240px;
             min-height: 100vh;
             transition: margin-left 0.3s ease;
             background-color: #f9fafb;
             color: #111827;
             position: relative;
             z-index: 1;
+            width: calc(100% - 240px);
         }
         
         .main-content.expanded {
@@ -613,8 +614,10 @@
         </div>
 
         <!-- Page Content -->
-        <main class="flex-1 relative z-1 pt-6 px-6">
-            @yield('content')
+        <main class="flex-1 relative z-1 py-6 px-4 sm:px-6 lg:px-8">
+            <div class="w-full">
+                @yield('content')
+            </div>
         </main>
     </div>
 </body>

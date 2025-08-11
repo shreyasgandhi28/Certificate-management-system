@@ -14,6 +14,10 @@
     </div>
 
     <div class="overflow-x-auto">
+        <div class="flex items-center justify-end mb-3 gap-2">
+            <a href="{{ route('admin.users.invite') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Invite User</a>
+            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Create User</a>
+        </div>
         <table class="w-full">
             <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
@@ -40,7 +44,21 @@
                         </form>
                     </td>
                     <td class="py-3 px-4">
-                        <span class="text-xs table-text-muted">ID: {{ $user->id }}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs table-text-muted">ID: {{ $user->id }}</span>
+                            @if(!$user->trashed())
+                            <form method="POST" action="{{ route('admin.users.destroy', $user) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button class="px-2 py-1 text-xs rounded btn-danger">Delete</button>
+                            </form>
+                            @else
+                            <form method="POST" action="{{ route('admin.users.restore', $user->id) }}">
+                                @csrf
+                                <button class="px-2 py-1 text-xs rounded btn-success">Restore</button>
+                            </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty

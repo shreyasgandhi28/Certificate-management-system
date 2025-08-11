@@ -33,11 +33,14 @@ Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->pref
     Route::get('/applicant-stats', [App\Http\Controllers\Admin\DashboardController::class, 'applicantStats'])->name('applicant-stats');
     // Documents/Uploads Management
     Route::get('/uploads', [App\Http\Controllers\Admin\UploadController::class, 'index'])->name('uploads.index');
+        Route::get('/uploads-export', [App\Http\Controllers\Admin\UploadController::class, 'exportCsv'])->name('uploads.export');
     Route::get('/uploads/{upload}/view', [App\Http\Controllers\Admin\UploadController::class, 'view'])->name('uploads.view');
     Route::post('/uploads/{upload}/verify', [App\Http\Controllers\Admin\UploadController::class, 'verify'])->name('uploads.verify');
     Route::post('/uploads/{upload}/reject', [App\Http\Controllers\Admin\UploadController::class, 'reject'])->name('uploads.reject');
     // Certificates Management
     Route::get('/certificates', [\App\Http\Controllers\Admin\CertificateController::class, 'index'])->name('certificates.index');
+        Route::get('/certificates-export', [\App\Http\Controllers\Admin\CertificateController::class, 'exportCsv'])->name('certificates.export');
+    Route::get('/certificates/{certificate}/view', [\App\Http\Controllers\Admin\CertificateController::class, 'view'])->name('certificates.view');
     Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\Admin\CertificateController::class, 'download'])->name('certificates.download');
     Route::post('/certificates/{certificate}/send-email', [\App\Http\Controllers\Admin\CertificateController::class, 'sendEmail'])->name('certificates.send-email');
     Route::post('/certificates/{certificate}/send-whatsapp', [\App\Http\Controllers\Admin\CertificateController::class, 'sendWhatsApp'])->name('certificates.send-whatsapp');
@@ -45,6 +48,13 @@ Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->pref
     // Users Management
     Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::post('/users/{user}/roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.update-roles');
+    Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{id}/restore', [App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
+    // User creation (Super Admin only guarded inside controller)
+    Route::get('/users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
+    Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
+    Route::get('/users/invite', [App\Http\Controllers\Admin\UserController::class, 'inviteForm'])->name('users.invite');
+    Route::post('/users/invite', [App\Http\Controllers\Admin\UserController::class, 'sendInvite'])->name('users.send-invite');
 });
 
 
@@ -53,8 +63,13 @@ Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->pref
     Route::get('/applicants', [\App\Http\Controllers\Admin\ApplicantController::class, 'index'])->name('applicants.index');
     Route::get('/applicants-export', [\App\Http\Controllers\Admin\ApplicantController::class, 'exportCsv'])->name('applicants.export');
     Route::get('/applicants/{applicant}', [\App\Http\Controllers\Admin\ApplicantController::class, 'show'])->name('applicants.show');
+    Route::get('/applicants/{applicant}/edit', [\App\Http\Controllers\Admin\ApplicantController::class, 'edit'])->name('applicants.edit');
+    Route::put('/applicants/{applicant}', [\App\Http\Controllers\Admin\ApplicantController::class, 'update'])->name('applicants.update');
     Route::post('/applicants/{applicant}/start-verification', [\App\Http\Controllers\Admin\ApplicantController::class, 'startVerification'])->name('applicants.start-verification');
     Route::post('/applicants/{applicant}/complete-verification', [\App\Http\Controllers\Admin\ApplicantController::class, 'completeVerification'])->name('applicants.complete-verification');
     Route::post('/applicants/{applicant}/reject', [\App\Http\Controllers\Admin\ApplicantController::class, 'reject'])->name('applicants.reject');
     Route::post('/applicants/{applicant}/generate-certificate', [\App\Http\Controllers\Admin\ApplicantController::class, 'generateCertificate'])->name('applicants.generate-certificate');
+    // Soft delete/restore Applicants
+    Route::delete('/applicants/{applicant}', [\App\Http\Controllers\Admin\ApplicantController::class, 'destroy'])->name('applicants.destroy');
+    Route::post('/applicants/{id}/restore', [\App\Http\Controllers\Admin\ApplicantController::class, 'restore'])->name('applicants.restore');
 });

@@ -15,7 +15,7 @@ class TemplateSeeder extends Seeder
             [
                 'name' => 'Basic Certificate',
                 'description' => 'Default certificate template',
-                'blade_path' => 'certificates.templates.basic',
+                'blade_path' => 'admin.certificates.templates.basic',
                 'variables' => [
                     'name', 'email', 'phone', 'serial_number', 'issued_at'
                 ],

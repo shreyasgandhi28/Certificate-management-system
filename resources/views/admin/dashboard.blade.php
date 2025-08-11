@@ -5,7 +5,7 @@
 @section('page-description', 'Certificate Management Overview')
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="space-y-6">
     <!-- KPI Cards - FORCED HORIZONTAL LAYOUT USING FLEXBOX -->
     <div class="flex flex-col sm:flex-row gap-4 lg:gap-6">
         <!-- Total Applications -->
@@ -183,7 +183,7 @@
                             </span>
                         </td>
                         <td class="py-4 px-4">
-                            @if($applicant->status === 'pending')
+                            @if($applicant->status === 'pending' || $applicant->status === 'in_verification')
                                 <div class="flex items-center">
                                     <div class="legend-dot-pending"></div>
                                     <span class="text-sm font-medium card-text-primary">Pending</span>
@@ -229,7 +229,6 @@
             </table>
         </div>
     </div>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

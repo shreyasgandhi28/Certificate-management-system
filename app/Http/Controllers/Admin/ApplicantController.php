@@ -24,6 +24,10 @@ class ApplicantController extends Controller
         if ($name = $request->input('name')) {
             $query->where('name', 'like', "%{$name}%");
         }
+        // Filter by ID
+        if ($id = $request->input('id')) {
+            $query->where('id', $id);
+        }
         // Filter by email
         if ($email = $request->input('email')) {
             $query->where('email', 'like', "%{$email}%");
@@ -50,6 +54,45 @@ class ApplicantController extends Controller
     {
         $applicant->load(['uploads']);
         return view('admin.applicants.show', compact('applicant'));
+    }
+
+    public function edit(Applicant $applicant)
+    {
+        return view('admin.applicants.edit', compact('applicant'));
+    }
+
+    public function update(Request $request, Applicant $applicant)
+    {
+        $validated = $request->validate([
+            'name' => ['required','string','max:255'],
+            'email' => ['required','email','max:255'],
+            'phone' => ['nullable','string','max:30'],
+            'status' => ['required','in:pending,in_verification,verified,rejected,certificate_generated'],
+            'uploads' => ['array'],
+            'uploads.*.verification_status' => ['in:pending,verified,rejected']
+        ]);
+        $applicant->update(collect($validated)->only(['name','email','phone','status'])->toArray());
+
+        // Update upload verification statuses if provided
+        foreach ($request->input('uploads', []) as $uploadId => $data) {
+            \App\Models\Upload::where('id', $uploadId)
+                ->where('applicant_id', $applicant->id)
+                ->update(['verification_status' => $data['verification_status'] ?? 'pending']);
+        }
+        return redirect()->route('admin.applicants.show', $applicant)->with('success','Application updated.');
+    }
+
+    public function destroy(Applicant $applicant)
+    {
+        $applicant->delete();
+        return redirect()->route('admin.applicants.index')->with('success','Application moved to trash.');
+    }
+
+    public function restore($id)
+    {
+        $applicant = Applicant::withTrashed()->findOrFail($id);
+        $applicant->restore();
+        return redirect()->route('admin.applicants.show', $applicant)->with('success','Application restored.');
     }
 
     public function startVerification(Request $request, Applicant $applicant)
@@ -166,6 +209,12 @@ class ApplicantController extends Controller
             fputcsv($handle, ['ID', 'Name', 'Email', 'Phone', 'Status', 'Submitted At', 'Verified At']);
 
             $query = Applicant::query();
+            if ($ids = $request->input('ids')) {
+                $idArray = collect(explode(',', $ids))->filter()->values();
+                if ($idArray->isNotEmpty()) {
+                    $query->whereIn('id', $idArray);
+                }
+            }
             if ($name = $request->input('name')) $query->where('name', 'like', "%{$name}%");
             if ($email = $request->input('email')) $query->where('email', 'like', "%{$email}%");
             if ($status = $request->input('status')) $query->where('status', $status);
@@ -223,7 +272,7 @@ class ApplicantController extends Controller
         Notification::route('mail', $applicant->email)
             ->notify(new CertificateGeneratedNotification($certificate));
 
-        return back()->with('success', 'Certificate has been generated and emailed.');
+        return redirect()->route('admin.applicants.index')->with('success', 'Certificate generated successfully.');
     }
 }
 

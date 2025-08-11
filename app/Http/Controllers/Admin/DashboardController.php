@@ -15,7 +15,8 @@ class DashboardController extends Controller
         // Get basic statistics
         $stats = [
             'total_applications' => Applicant::count(),
-            'pending_applications' => Applicant::where('status', 'pending')->count(),
+            // Treat in_verification as pending for dashboard KPIs
+            'pending_applications' => Applicant::whereIn('status', ['pending', 'in_verification'])->count(),
             'verified_applications' => Applicant::where('status', 'verified')->count(),
             'rejected_applications' => Applicant::where('status', 'rejected')->count(),
             'total_uploads' => Upload::count(),

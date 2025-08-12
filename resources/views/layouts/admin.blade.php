@@ -446,8 +446,12 @@
     >
         <!-- Sidebar Header -->
         <div class="sidebar-header py-4">
-            <div class="flex items-center justify-center">
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">Certificate Manager</h1>
+            <div class="flex items-center justify-start pl-6">
+                <!-- Favicon Logo -->
+                <div class="flex-shrink-0 mr-3">
+                    <img src="{{ asset('images/favicon.svg') }}" alt="Logo" class="h-10 w-10 dark:invert dark:brightness-0 dark:filter">
+                </div>
+                <h1 class="text-base font-semibold tracking-tight text-gray-900 dark:text-white font-sans">CERTIFICATE MANAGER</h1>
             </div>
         </div>
 

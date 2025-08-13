@@ -150,13 +150,53 @@
             <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
                     <th class="text-left py-3 px-4"><input type="checkbox" id="selectAllCerts"></th>
-                    <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Serial</th>
-                    <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Applicant Details</th>
-                    <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Template</th>
-                    <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Generated</th>
-                    <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Status</th>
-                    <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Delivery</th>
-                    <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Actions</th>
+                    <th class="text-left py-3 px-4 text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="id" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Serial
+                        </x-table.sortable-header>
+                    </th>
+                    <th class="text-left py-3 px-4 text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="applicant_id" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Applicant Details
+                        </x-table.sortable-header>
+                    </th>
+                    <th class="text-left py-3 px-4 text-sm table-text-muted">Template</th>
+                    <th class="text-left py-3 px-4 text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="generated_at" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Generated
+                        </x-table.sortable-header>
+                    </th>
+                    <th class="text-left py-3 px-4 text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="status" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Status
+                        </x-table.sortable-header>
+                    </th>
+                    <th class="text-left py-3 px-4 text-sm table-text-muted">Delivery</th>
+                    <th class="text-left py-3 px-4 text-sm table-text-muted">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">

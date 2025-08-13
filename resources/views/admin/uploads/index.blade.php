@@ -170,10 +170,50 @@
                     <th class="py-3 px-4 w-10 text-center">
                         <input type="checkbox" id="selectAllUploads" class="align-middle">
                     </th>
-                    <th class="py-3 px-4 text-left text-sm table-text-muted">Applicant</th>
-                    <th class="py-3 px-4 text-left text-sm table-text-muted">Type</th>
-                    <th class="py-3 px-4 text-left text-sm table-text-muted">Filename</th>
-                    <th class="py-3 px-4 text-left text-sm table-text-muted">Status</th>
+                    <th class="py-3 px-4 text-left text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="applicant_id" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Applicant
+                        </x-table.sortable-header>
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="type" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Type
+                        </x-table.sortable-header>
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="original_filename" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Filename
+                        </x-table.sortable-header>
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm table-text-muted">
+                        <x-table.sortable-header 
+                            field="verification_status" 
+                            :sortField="$sort['field'] ?? null" 
+                            :sortDirection="$sort['direction'] ?? 'asc'"
+                            :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                            class="justify-start"
+                        >
+                            Status
+                        </x-table.sortable-header>
+                    </th>
                     <th class="py-3 px-4 text-left text-sm table-text-muted">Actions</th>
                 </tr>
             </thead>

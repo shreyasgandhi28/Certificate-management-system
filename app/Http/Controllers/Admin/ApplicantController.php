@@ -13,9 +13,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\CertificateGeneratedNotification;
+use App\Http\Traits\HasSortableColumns;
 
 class ApplicantController extends Controller
 {
+    use HasSortableColumns;
+
     public function index(Request $request)
     {
         $query = Applicant::query();
@@ -45,9 +48,13 @@ class ApplicantController extends Controller
             $query->whereDate('submitted_at', $date);
         }
 
-        $applicants = $query->with('uploads')->latest()->paginate(10)->appends($request->except('page'));
+        // Apply sorting
+        $validSortFields = ['id', 'name', 'email', 'phone', 'status', 'submitted_at', 'created_at'];
+        $sort = $this->applySorting($query, $request, $validSortFields, 'created_at', 'desc');
 
-        return view('admin.applicants.index', compact('applicants'));
+        $applicants = $query->with('uploads')->paginate(10)->appends($request->except('page'));
+
+        return view('admin.applicants.index', compact('applicants', 'sort'));
     }
 
     public function show(Applicant $applicant)

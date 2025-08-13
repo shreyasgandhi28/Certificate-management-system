@@ -48,6 +48,7 @@ Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->pref
     // Users Management
     Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::post('/users/{user}/roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.update-roles');
+    Route::patch('/users/{user}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
     Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{id}/restore', [App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
     // User creation (Super Admin only guarded inside controller)

@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Upload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Traits\HasSortableColumns;
 
 class UploadController extends Controller
 {
+    use HasSortableColumns;
+
     /**
      * Display a listing of the uploaded documents.
      */
@@ -64,9 +67,13 @@ class UploadController extends Controller
             $query->whereDate('created_at', '<=', $to);
         }
 
-        $uploads = $query->latest()->paginate(15)->appends($request->except('page'));
+        // Apply sorting
+        $validSortFields = ['id', 'applicant_id', 'type', 'original_filename', 'verification_status', 'created_at', 'updated_at'];
+        $sort = $this->applySorting($query, $request, $validSortFields, 'created_at', 'desc');
 
-        return view('admin.uploads.index', compact('uploads'));
+        $uploads = $query->paginate(15)->appends($request->except('page'));
+
+        return view('admin.uploads.index', compact('uploads', 'sort'));
     }
 
     /**

@@ -174,12 +174,52 @@
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700">
                             <th class="text-left py-3 px-4"><input type="checkbox" id="selectAll"></th>
-                            <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Applicant</th>
-                            <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Email</th>
-                            <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Documents</th>
-                            <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Status</th>
-                            <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Date</th>
-                            <th class="text-left py-3 px-4 font-medium table-text-muted text-sm">Action</th>
+                            <th class="text-left py-3 px-4 text-sm table-text-muted">
+                                <x-table.sortable-header 
+                                    field="name" 
+                                    :sortField="$sort['field'] ?? null" 
+                                    :sortDirection="$sort['direction'] ?? 'asc'"
+                                    :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                                    class="justify-start"
+                                >
+                                    Applicant
+                                </x-table.sortable-header>
+                            </th>
+                            <th class="text-left py-3 px-4 text-sm table-text-muted">
+                                <x-table.sortable-header 
+                                    field="email" 
+                                    :sortField="$sort['field'] ?? null" 
+                                    :sortDirection="$sort['direction'] ?? 'asc'"
+                                    :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                                    class="justify-start"
+                                >
+                                    Email
+                                </x-table.sortable-header>
+                            </th>
+                            <th class="text-left py-3 px-4 text-sm table-text-muted">Documents</th>
+                            <th class="text-left py-3 px-4 text-sm table-text-muted">
+                                <x-table.sortable-header 
+                                    field="status" 
+                                    :sortField="$sort['field'] ?? null" 
+                                    :sortDirection="$sort['direction'] ?? 'asc'"
+                                    :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                                    class="justify-start"
+                                >
+                                    Status
+                                </x-table.sortable-header>
+                            </th>
+                            <th class="text-left py-3 px-4 text-sm table-text-muted">
+                                <x-table.sortable-header 
+                                    field="submitted_at" 
+                                    :sortField="$sort['field'] ?? null" 
+                                    :sortDirection="$sort['direction'] ?? 'asc'"
+                                    :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                                    class="justify-start"
+                                >
+                                    Date
+                                </x-table.sortable-header>
+                            </th>
+                            <th class="text-left py-3 px-4 text-sm table-text-muted">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">

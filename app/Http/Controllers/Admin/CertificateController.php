@@ -9,9 +9,12 @@ use App\Jobs\SendCertificateWhatsApp;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Traits\HasSortableColumns;
 
 class CertificateController extends Controller
 {
+    use HasSortableColumns;
+
     public function index(Request $request)
     {
         $query = Certificate::with(['applicant', 'template']);
@@ -58,9 +61,13 @@ class CertificateController extends Controller
             $query->whereDate('generated_at', '<=', $to);
         }
 
-        $certificates = $query->latest()->paginate(15)->appends($request->except('page'));
+        // Apply sorting
+        $validSortFields = ['id', 'applicant_id', 'status', 'generated_at', 'created_at'];
+        $sort = $this->applySorting($query, $request, $validSortFields, 'created_at', 'desc');
 
-        return view('admin.certificates.index', compact('certificates'));
+        $certificates = $query->paginate(15)->appends($request->except('page'));
+
+        return view('admin.certificates.index', compact('certificates', 'sort'));
     }
 
     public function download(Certificate $certificate)

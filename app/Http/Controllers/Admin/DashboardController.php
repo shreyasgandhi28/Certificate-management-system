@@ -7,6 +7,7 @@ use App\Models\Applicant;
 use App\Models\Upload;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
@@ -44,20 +45,36 @@ class DashboardController extends Controller
         ];
 
         // Get recent applications
-        $recentApplications = Applicant::with('uploads')
-                                     ->latest('created_at')
-                                     ->take(10)
-                                     ->get()
-                                     ->map(function ($applicant) {
-                                         $applicant->submitted_at = $applicant->created_at;
-                                         return $applicant;
-                                     });
+        $sortField = request('sort', 'submitted_at');
+        $sortDirection = in_array(strtolower(request('direction', 'desc')), ['asc', 'desc']) 
+            ? strtolower(request('direction', 'desc')) 
+            : 'desc';
 
-        return view('admin.dashboard', compact(
-            'stats',
-            'monthlyData', 
-            'applicationStatusStats',
-            'recentApplications'
-        ));
+        $query = Applicant::with('uploads')
+            ->withCount('uploads')
+            ->orderBy($sortField, $sortDirection)
+            ->take(10);
+
+        $recentApplications = $query->get()
+            ->map(function ($applicant) {
+                $applicant->load('uploads');
+                return $applicant;
+            });
+        
+        // Prepare sort data for view
+        $sort = [
+            'field' => $sortField,
+            'direction' => $sortDirection,
+            'nextDirection' => $sortDirection === 'asc' ? 'desc' : 'asc'
+        ];
+
+        return view('admin.dashboard', [
+            'stats' => $stats,
+            'monthlyData' => $monthlyData,
+            'applicationStatusStats' => $applicationStatusStats,
+            'recentApplications' => $recentApplications,
+            'sort' => $sort,
+            'queryParams' => request()->except(['sort', 'direction'])
+        ]);
     }
 }

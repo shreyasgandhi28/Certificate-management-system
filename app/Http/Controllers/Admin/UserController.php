@@ -8,24 +8,92 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Traits\HasSortableColumns;
 
 class UserController extends Controller
 {
+    use HasSortableColumns;
+
     public function index(Request $request)
     {
         $query = User::query();
+
+        // Include trashed users if requested
         if ($request->boolean('with_trashed')) {
             $query->withTrashed();
         }
+
+        // Search by name or email
         if ($q = $request->input('q')) {
             $query->where(function ($sub) use ($q) {
                 $sub->where('name', 'like', "%{$q}%")
                     ->orWhere('email', 'like', "%{$q}%");
             });
         }
-        $users = $query->with('roles')->paginate(15)->appends($request->except('page'));
+
+        // Filter by role
+        if ($role = $request->input('role')) {
+            $query->role($role);
+        }
+
+        // Filter by status
+        if ($status = $request->input('status')) {
+            if ($status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // Date range filter
+        if ($from = $request->input('from')) {
+            $query->whereDate('created_at', '>=', $from);
+        }
+        
+        if ($to = $request->input('to')) {
+            $query->whereDate('created_at', '<=', $to);
+        }
+
+        // Apply sorting
+        $validSortFields = ['id', 'name', 'email', 'is_active', 'created_at', 'updated_at'];
+        $sort = $this->applySorting($query, $request, $validSortFields, 'created_at', 'desc');
+
+        $users = $query->with('roles')
+                      ->paginate(15)
+                      ->appends($request->except('page'));
+
         $roles = Role::orderBy('name')->pluck('name');
-        return view('admin.users.index', compact('users', 'roles'));
+        
+        return view('admin.users.index', [
+            'users' => $users,
+            'roles' => $roles,
+            'filters' => $request->only(['q', 'role', 'status', 'from', 'to']),
+            'sort' => $sort
+        ]);
+    }
+
+    public function updateStatus(Request $request, User $user)
+    {
+        $request->validate([
+            'is_active' => 'required|boolean'
+        ]);
+
+        $user->update([
+            'is_active' => $request->is_active
+        ]);
+
+        // Log the action
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'Updated user status',
+            'description' => 'Changed status of user ' . $user->email . ' to ' . ($request->is_active ? 'active' : 'inactive'),
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'properties' => $user->toJson()
+        ]);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User status updated successfully');
     }
 
     public function destroy(User $user)

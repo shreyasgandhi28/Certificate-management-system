@@ -205,7 +205,7 @@
         }
         
         .dark .table-text-muted {
-            color: #d1d5db !important;
+            color: #9ca3af !important;
         }
         
         /* Borders */

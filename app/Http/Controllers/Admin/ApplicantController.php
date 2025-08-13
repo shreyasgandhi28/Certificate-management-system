@@ -91,8 +91,20 @@ class ApplicantController extends Controller
 
     public function destroy(Applicant $applicant)
     {
-        $applicant->delete();
-        return redirect()->route('admin.applicants.index')->with('success','Application moved to trash.');
+        try {
+            // Delete all uploads first (this will trigger file deletion in the model)
+            $applicant->uploads()->forceDelete();
+            
+            // Then delete the applicant
+            $applicant->forceDelete();
+            
+            return redirect()->route('admin.applicants.index')
+                ->with('success', 'Application and all related documents have been permanently deleted.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting applicant: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Failed to delete application. Please try again.');
+        }
     }
 
     public function restore($id)

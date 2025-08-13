@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Str;
 
 class Applicant extends Model
@@ -47,6 +48,29 @@ class Applicant extends Model
     {
         parent::boot();
         
+        // Delete related uploads when an applicant is deleted
+        static::deleting(function($applicant) {
+            // Get all uploads for this applicant
+            $uploads = $applicant->uploads()->withTrashed()->get();
+            
+            // If not force deleting (i.e., soft delete)
+            if (method_exists($applicant, 'isForceDeleting') && !$applicant->isForceDeleting()) {
+                // Just soft delete the uploads
+                $applicant->uploads()->delete();
+            } else {
+                // Force delete the uploads and their files
+                foreach ($uploads as $upload) {
+                    // This will trigger the deleting event in the Upload model
+                    $upload->forceDelete();
+                }
+            }
+        });
+        
+        // Restore related uploads when an applicant is restored
+        static::restoring(function($applicant) {
+            $applicant->uploads()->onlyTrashed()->restore();
+        });
+        
         static::creating(function ($model) {
             if (empty($model->token)) {
                 $model->token = Str::random(64);
@@ -55,8 +79,39 @@ class Applicant extends Model
                 $model->submitted_at = now();
             }
         });
+        
+        // Ensure all file deletions are handled in a transaction
+        static::deleted(function($applicant) {
+            if ($applicant->isForceDeleting()) {
+                // Log the deletion for audit
+                \App\Models\AuditLog::create([
+                    'user_id' => auth()->id() ?? null,
+                    'action' => 'applicant_deleted',
+                    'target_type' => get_class($applicant),
+                    'target_id' => $applicant->id,
+                    'metadata' => [
+                        'name' => $applicant->name,
+                        'email' => $applicant->email,
+                        'uploads_deleted' => $applicant->uploads()->count(),
+                    ],
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+            }
+        });
     }
 
+    /**
+     * Get all applications for the applicant.
+     */
+    public function applications(): HasMany
+    {
+        return $this->hasMany(Application::class);
+    }
+    
+    /**
+     * Get all uploads for the applicant.
+     */
     public function uploads(): HasMany
     {
         return $this->hasMany(Upload::class);

@@ -104,13 +104,34 @@
                         Gender <span class="text-red-500">*</span>
                     </label>
                     <select id="gender" name="gender" 
-                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white/50 dark:bg-gray-700/50 dark:text-gray-100"
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white/80 dark:bg-gray-700/50 dark:text-gray-100"
                             required>
                         <option value="">Select Gender</option>
                         <option value="male" {{ old('gender', isset($applicant) ? $applicant->gender : '') === 'male' ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ old('gender', isset($applicant) ? $applicant->gender : '') === 'female' ? 'selected' : '' }}>Female</option>
                         <option value="other" {{ old('gender', isset($applicant) ? $applicant->gender : '') === 'other' ? 'selected' : '' }}>Other</option>
                     </select>
+                    <style>
+                        select {
+                            -webkit-appearance: none;
+                            -moz-appearance: none;
+                            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%236B7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+                            background-repeat: no-repeat;
+                            background-position: right 1rem center;
+                            background-size: 1em;
+                        }
+                        .dark select {
+                            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%239CA3AF'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+                        }
+                        select option {
+                            background-color: white;
+                            color: #1f2937;
+                        }
+                        .dark select option {
+                            background-color: #1f2937;
+                            color: #f3f4f6;
+                        }
+                    </style>
                     @error('gender')
                         <p class="text-red-500 text-sm">{{ $message }}</p>
                     @enderror

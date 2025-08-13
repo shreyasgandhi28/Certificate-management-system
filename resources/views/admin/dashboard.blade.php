@@ -212,6 +212,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($recentApplications as $applicant)
+                    @if($applicant)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td class="py-4 px-4">
                             <div class="flex items-center">
@@ -248,6 +249,7 @@
                                 </div>
                             @endif
                         </td>
+                    @endif
                         <td class="py-4 px-4">
                             <div class="table-text">{{ $applicant->submitted_at->format('M j, Y') }}</div>
                             <div class="table-text-muted text-sm">{{ $applicant->submitted_at->diffForHumans() }}</div>

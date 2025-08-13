@@ -5,11 +5,41 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 class Upload extends Model
 {
     use HasFactory;
+    
+    /**
+     * The "booting" method of the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Add a global scope to only include uploads with existing applicants
+        static::addGlobalScope('hasApplicant', function (Builder $builder) {
+            $builder->has('applicant');
+        });
+
+        // Delete the actual file from storage when the upload record is deleted
+        static::deleting(function($upload) {
+            $upload->deleteFile();
+        });
+        
+        // Log when an upload is created or updated
+        static::saved(function($upload) {
+            if ($upload->wasRecentlyCreated) {
+                $upload->logAction('upload_created');
+            } else if ($upload->wasChanged()) {
+                $upload->logAction('upload_updated');
+            }
+        });
+    }
+    
+
 
     protected $fillable = [
         'applicant_id',
@@ -32,9 +62,12 @@ class Upload extends Model
         'file_size' => 'integer'
     ];
 
+    /**
+     * Get the applicant that owns the upload.
+     */
     public function applicant(): BelongsTo
     {
-        return $this->belongsTo(Applicant::class);
+        return $this->belongsTo(Applicant::class)->withTrashed();
     }
 
     public function verifier(): BelongsTo
@@ -65,6 +98,72 @@ class Upload extends Model
     public function isRejected(): bool
     {
         return $this->verification_status === 'rejected';
+    }
+    
+    /**
+     * Delete the physical file from storage
+     */
+    public function deleteFile(): bool
+    {
+        $deleted = false;
+        
+        // Delete the main file if it exists
+        if ($this->file_path && Storage::exists($this->file_path)) {
+            $deleted = Storage::delete($this->file_path);
+        }
+        
+        // Also delete any thumbnails if they exist
+        if ($this->file_path) {
+            $pathInfo = pathinfo($this->file_path);
+            $thumbnailPath = $pathInfo['dirname'] . '/thumbs/' . $pathInfo['basename'];
+            if (Storage::exists($thumbnailPath)) {
+                Storage::delete($thumbnailPath);
+            }
+        }
+        
+        return $deleted;
+    }
+    
+    /**
+     * Log an action for this upload
+     */
+    protected function logAction(string $action): void
+    {
+        if (!class_exists('\App\Models\AuditLog')) {
+            return;
+        }
+        
+        $metadata = [
+            'upload_id' => $this->id,
+            'file_name' => $this->original_filename,
+            'file_type' => $this->mime_type,
+            'file_size' => $this->file_size,
+            'verification_status' => $this->verification_status,
+        ];
+        
+        if ($this->verifier) {
+            $metadata['verifier_id'] = $this->verifier_id;
+        }
+        
+        if ($this->applicant) {
+            $metadata['applicant_id'] = $this->applicant_id;
+            $metadata['applicant_name'] = $this->applicant->name;
+        }
+        
+        try {
+            \App\Models\AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'target_type' => get_class($this),
+                'target_id' => $this->id,
+                'metadata' => $metadata,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Exception $e) {
+            // Log the error but don't fail the operation
+            \Log::error('Failed to log upload action: ' . $e->getMessage());
+        }
     }
 
     public function getTypeLabel(): string

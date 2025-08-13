@@ -17,7 +17,12 @@ class UploadController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Upload::with('applicant');
+        // Only include uploads where the applicant exists and is not soft-deleted
+        $query = Upload::whereHas('applicant', function($q) {
+            $q->withTrashed()->whereNull('deleted_at');
+        })->with(['applicant' => function($q) {
+            $q->withTrashed();
+        }]);
 
         // Keyword search across filename, type, applicant name/email
         if ($q = $request->input('q')) {
@@ -98,14 +103,20 @@ class UploadController extends Controller
         $callback = function () use ($request) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, ['ID', 'Application ID', 'Applicant', 'Email', 'Type', 'Filename', 'Status', 'Uploaded At']);
+            
+            // Apply the same filters as the index method
+            $query = Upload::whereHas('applicant', function($q) {
+                $q->withTrashed()->whereNull('deleted_at');
+            })->with(['applicant' => function($q) {
+                $q->withTrashed();
+            }]);
 
-            $query = Upload::with('applicant');
+            // Apply filters from the request
             if ($ids = $request->input('ids')) {
-                $idArray = collect(explode(',', $ids))->filter()->values();
-                if ($idArray->isNotEmpty()) {
-                    $query->whereIn('id', $idArray);
-                }
+                $ids = explode(',', $ids);
+                $query->whereIn('id', $ids);
             }
+            
             if ($q = $request->input('q')) {
                 $query->where(function ($sub) use ($q) {
                     $sub->where('original_filename', 'like', "%{$q}%")

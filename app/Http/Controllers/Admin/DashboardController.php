@@ -20,7 +20,9 @@ class DashboardController extends Controller
             'pending_applications' => Applicant::whereIn('status', ['pending', 'in_verification'])->count(),
             'verified_applications' => Applicant::where('status', 'verified')->count(),
             'rejected_applications' => Applicant::where('status', 'rejected')->count(),
-            'total_uploads' => Upload::count(),
+            'total_uploads' => Upload::whereHas('applicant', function($q) {
+                $q->whereNull('deleted_at');
+            })->count(),
         ];
 
         // Get monthly data for the last 12 months
@@ -50,15 +52,26 @@ class DashboardController extends Controller
             ? strtolower(request('direction', 'desc')) 
             : 'desc';
 
-        $query = Applicant::with('uploads')
-            ->withCount('uploads')
+        $query = Applicant::whereHas('uploads', function($q) {
+                $q->whereHas('applicant', function($q) {
+                    $q->whereNull('deleted_at');
+                });
+            })
+            ->with(['uploads' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->withCount(['uploads' => function($q) {
+                $q->whereHas('applicant', function($q) {
+                    $q->whereNull('deleted_at');
+                });
+            }])
             ->orderBy($sortField, $sortDirection)
             ->take(10);
 
         $recentApplications = $query->get()
-            ->map(function ($applicant) {
-                $applicant->load('uploads');
-                return $applicant;
+            ->filter(function($applicant) {
+                // Ensure the applicant exists and has at least one upload
+                return $applicant !== null && $applicant->uploads->isNotEmpty();
             });
         
         // Prepare sort data for view

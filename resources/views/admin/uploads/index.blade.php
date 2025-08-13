@@ -48,7 +48,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Applicant (name or email)</label>
                             <input type="text" name="applicant" value="{{ request('applicant') }}" placeholder="e.g. John or john@email.com"
-                                   class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                   class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent bg-white/80 dark:bg-gray-800/80 dark:text-gray-300">
                         </div>
 
                         <div class="grid grid-cols-2 gap-6">
@@ -224,8 +224,12 @@
                         <input type="checkbox" class="rowChkUpload align-middle" value="{{ $upload->id }}">
                     </td>
                     <td class="py-3 px-4 table-text">
-                        <div class="font-medium">{{ $upload->applicant->name }}</div>
-                        <div class="text-xs table-text-muted">#{{ str_pad($upload->applicant->id, 4, '0', STR_PAD_LEFT) }} · {{ $upload->applicant->email }}</div>
+                        @if($upload->applicant)
+                            <div class="font-medium">{{ $upload->applicant->name }}</div>
+                            <div class="text-xs table-text-muted">#{{ str_pad($upload->applicant->id, 4, '0', STR_PAD_LEFT) }} · {{ $upload->applicant->email }}</div>
+                        @else
+                            <div class="text-gray-400 italic">No applicant</div>
+                        @endif
                     </td>
                     <td class="py-3 px-4 table-text">{{ $upload->getTypeLabel() }}</td>
                     <td class="py-3 px-4 table-text">{{ $upload->original_filename }}</td>

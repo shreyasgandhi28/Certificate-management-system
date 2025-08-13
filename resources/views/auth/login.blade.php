@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sign In - Certificate Management System</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('images/favicon-white.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('images/favicon-white.svg') }}" type="image/svg+xml">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -255,8 +259,8 @@
             object-fit: contain;
             object-position: center;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            /* Light mode - normal logo */
-            filter: none;
+            /* Make logo white in both light and dark modes */
+            filter: brightness(0) invert(1);
         }
         
         /* Dark mode - make logo white/visible */

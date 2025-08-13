@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Dashboard') - {{ config('app.name', 'Certificate Management') }}</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('images/favicon-white.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('images/favicon-white.svg') }}" type="image/svg+xml">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -450,9 +454,12 @@
         <!-- Sidebar Header -->
         <div class="sidebar-header py-4">
             <div class="flex items-center justify-start pl-6">
-                <!-- Favicon Logo -->
+                <!-- Favicon Logo - Shows original in light mode, white in dark mode -->
                 <div class="flex-shrink-0 mr-3">
-                    <img src="{{ asset('images/favicon.svg') }}" alt="Logo" class="h-10 w-10 dark:invert dark:brightness-0 dark:filter">
+                    <!-- Original favicon for light mode -->
+                    <img src="{{ asset('images/favicon.svg') }}" alt="Logo" class="h-10 w-10 dark:hidden">
+                    <!-- White favicon for dark mode -->
+                    <img src="{{ asset('images/favicon-white.svg') }}" alt="Logo" class="h-10 w-10 hidden dark:block">
                 </div>
                 <h1 class="text-base font-semibold tracking-tight text-gray-900 dark:text-white font-sans">CERTIFICATE MANAGER</h1>
             </div>

@@ -282,20 +282,109 @@
 document.addEventListener('DOMContentLoaded', function() {
     const isDark = document.documentElement.classList.contains('dark');
 
+    // Consistent colors for both light and dark modes
     const colors = {
-        primary: '#3b82f6',
-        success: '#10b981',
-        warning: '#fbbf24',
-        danger: '#ef4444',
+        primary: isDark ? '#60a5fa' : '#3b82f6',
+        success: isDark ? '#10b981' : '#10b981',
+        warning: isDark ? '#f59e0b' : '#f59e0b',
+        danger: isDark ? '#ef4444' : '#ef4444',
         text: isDark ? '#f9fafb' : '#111827',
-        muted: isDark ? '#d1d5db' : '#6b7280',
         background: isDark ? '#1f2937' : '#ffffff',
-        grid: isDark ? 'rgba(156, 163, 175, 0.1)' : 'rgba(229, 231, 235, 0.2)'
+        grid: isDark ? 'rgba(107, 114, 128, 0.2)' : 'rgba(156, 163, 175, 0.3)',
+        axis: isDark ? '#9ca3af' : '#6b7280',
+        chartArea: isDark ? 'rgba(96, 165, 250, 0.08)' : 'rgba(59, 130, 246, 0.05)'
+    };
+    
+    // Base chart options
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                top: 20,
+                right: 20,
+                bottom: 10,
+                left: 10
+            }
+        },
+        plugins: {
+            legend: { 
+                display: false 
+            },
+            tooltip: {
+                backgroundColor: isDark ? '#374151' : '#ffffff',
+                titleColor: isDark ? '#ffffff' : '#111827',
+                bodyColor: isDark ? '#e5e7eb' : '#4b5563',
+                borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                borderWidth: 1,
+                cornerRadius: 8,
+                padding: 12,
+                titleFont: {
+                    size: 13,
+                    weight: '600',
+                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+                },
+                bodyFont: {
+                    size: 13,
+                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+                },
+                displayColors: false
+            }
+        },
+        scales: {
+            x: {
+                grid: {
+                    color: 'transparent',
+                    drawBorder: false,
+                    drawOnChartArea: false
+                },
+                ticks: {
+                    color: colors.axis,
+                    font: {
+                        size: 12,
+                        weight: '500',
+                        family: "'Inter', system-ui, -apple-system, sans-serif"
+                    },
+                    padding: 8
+                }
+            },
+            y: {
+                beginAtZero: true,
+                suggestedMax: 10, // Adjust based on your data range
+                grid: {
+                    color: colors.grid,
+                    drawBorder: false,
+                    drawTicks: false,
+                    borderDash: [4, 4],
+                    drawOnChartArea: true
+                },
+                ticks: {
+                    stepSize: 2,
+                    precision: 0,
+                    color: colors.axis,
+                    font: {
+                        size: 11,
+                        weight: '500',
+                        family: "'Inter', system-ui, -apple-system, sans-serif"
+                    },
+                    padding: 8,
+                    callback: function(value) {
+                        return Number.isInteger(value) ? value : '';
+                    }
+                },
+                border: { display: false }
+            }
+        }
     };
 
-    // Line Chart
+    // Modern Line Chart
     const monthlyCtx = document.getElementById('monthlyChart');
     if (monthlyCtx) {
+        // Create gradient for the chart area
+        const gradient = monthlyCtx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, isDark ? 'rgba(96, 165, 250, 0.2)' : 'rgba(37, 99, 235, 0.1)');
+        gradient.addColorStop(1, isDark ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 255, 255, 0)');
+
         new Chart(monthlyCtx, {
             type: 'line',
             data: {
@@ -304,40 +393,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     label: 'Applications',
                     data: @json($monthlyData->pluck('count')),
                     borderColor: colors.primary,
-                    backgroundColor: colors.primary + '20',
+                    backgroundColor: gradient,
                     fill: true,
-                    tension: 0.4,
+                    tension: 0.3,
                     borderWidth: 2,
-                    pointRadius: 4,
+                    pointRadius: 0,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: colors.primary,
-                    pointBorderColor: colors.background,
-                    pointBorderWidth: 2
+                    pointBackgroundColor: colors.background,
+                    pointBorderColor: colors.primary,
+                    pointBorderWidth: 2,
+                    pointHoverBorderWidth: 2,
+                    pointHoverBackgroundColor: colors.primary,
+                    pointHitRadius: 20,
+                    pointHoverBorderColor: colors.background
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: colors.background,
-                        titleColor: colors.text,
-                        bodyColor: colors.muted,
-                        borderColor: colors.grid,
-                        borderWidth: 1,
-                        cornerRadius: 8
+                ...chartOptions,
+                elements: {
+                    line: {
+                        borderJoinStyle: 'round'
                     }
                 },
-                scales: {
-                    x: {
-                        grid: { color: colors.grid },
-                        ticks: { color: colors.muted, font: { size: 12 } }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: colors.grid },
-                        ticks: { color: colors.muted, font: { size: 12 } }
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    ...chartOptions.plugins,
+                    tooltip: {
+                        ...chartOptions.plugins.tooltip,
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.parsed.y} applications`;
+                            }
+                        }
                     }
                 }
             }

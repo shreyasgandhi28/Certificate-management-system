@@ -14,6 +14,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Apply') - {{ config('app.name', 'Certificate Management') }}</title>
     
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('images/favicon-white.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('images/favicon-white.svg') }}" type="image/svg+xml">
+    
     <style>
         /* Logo Styling */
         .logo-container {

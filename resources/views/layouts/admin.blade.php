@@ -453,15 +453,15 @@
     >
         <!-- Sidebar Header -->
         <div class="sidebar-header py-4">
-            <div class="flex items-center justify-start pl-6">
+            <div class="flex items-center justify-center">
                 <!-- Favicon Logo - Shows original in light mode, white in dark mode -->
-                <div class="flex-shrink-0 mr-3">
+                <div class="flex-shrink-0">
                     <!-- Original favicon for light mode -->
                     <img src="{{ asset('images/favicon.svg') }}" alt="Logo" class="h-10 w-10 dark:hidden">
                     <!-- White favicon for dark mode -->
                     <img src="{{ asset('images/favicon-white.svg') }}" alt="Logo" class="h-10 w-10 hidden dark:block">
                 </div>
-                <h1 class="text-base font-semibold tracking-tight text-gray-900 dark:text-white font-sans">CERTIFICATE MANAGER</h1>
+                <h1 class="text-base font-semibold tracking-tight text-gray-900 dark:text-white font-sans ml-3">CERTIFICATE MANAGER</h1>
             </div>
         </div>
 

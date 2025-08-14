@@ -1,5 +1,22 @@
 @extends('layouts.admin')
 
+@push('styles')
+<style>
+    /* Ensure edit button gradient is applied */
+    a[href*="edit"].edit-btn,
+    a[href*="edit"].edit-btn:hover {
+        background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    a[href*="edit"].edit-btn:hover {
+        background: linear-gradient(135deg, #0f766e, #0d5e56) !important;
+    }
+</style>
+@endpush
+
 @section('title', 'Applicants')
 @section('page-title', 'Applicant Management')
 @section('page-description', 'View and manage certificate applications')
@@ -245,20 +262,11 @@
                             </td>
                             <td class="py-4 px-4">
                                 @if($applicant->status === 'pending' || $applicant->status === 'in_verification')
-                                    <div class="flex items-center">
-                                        <div class="legend-dot-pending"></div>
-                                        <span class="text-sm font-medium card-text-primary">Pending</span>
-                                    </div>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400">Pending</span>
                                 @elseif($applicant->status === 'verified')
-                                    <div class="flex items-center">
-                                        <div class="legend-dot-verified"></div>
-                                        <span class="text-sm font-medium card-text-primary">Verified</span>
-                                    </div>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">Verified</span>
                                 @else
-                                    <div class="flex items-center">
-                                        <div class="legend-dot-rejected"></div>
-                                        <span class="text-sm font-medium card-text-primary">Rejected</span>
-                                    </div>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400">Rejected</span>
                                 @endif
                             </td>
                             <td class="py-4 px-4">
@@ -266,11 +274,23 @@
                                 <div class="table-text-muted text-sm">{{ $applicant->submitted_at ? $applicant->submitted_at->diffForHumans() : '' }}</div>
                             </td>
                             <td class="py-4 px-4">
-                                <a href="{{ route('admin.applicants.show', $applicant) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View</a>
-                                @if(auth()->user()->hasAnyRole(['Super Admin','Certificate Issuer']))
-                                    <span class="mx-1 text-gray-300">|</span>
-                                    <a href="{{ route('admin.applicants.edit', $applicant) }}" class="text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white font-medium">Edit</a>
-                                @endif
+                                <div class="flex items-center space-x-2">
+                                    <a href="{{ route('admin.applicants.show', $applicant) }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-md shadow-sm transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        View
+                                    </a>
+                                    @if(auth()->user()->hasAnyRole(['Super Admin','Certificate Issuer']))
+                                    <a href="{{ route('admin.applicants.edit', $applicant) }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white rounded-md shadow-sm transition-all duration-200" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f59e0b 100%) !important; background-size: 200% auto !important;" onmouseover="this.style.backgroundPosition='right center'" onmouseout="this.style.backgroundPosition='left center'">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        Edit
+                                    </a>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

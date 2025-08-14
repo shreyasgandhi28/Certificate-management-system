@@ -5,6 +5,15 @@
 
 @section('content')
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 max-w-4xl">
+    <div class="mb-6">
+        <a href="{{ route('admin.applicants.index') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-medium text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to List
+        </a>
+    </div>
+    
     <form method="POST" action="{{ route('admin.applicants.update', $applicant) }}" class="space-y-4">
         @csrf
         @method('PUT')
@@ -46,14 +55,7 @@
                                 <a href="{{ route('admin.uploads.view', $upload) }}" target="_blank" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View</a>
                             </div>
 
-                            <div class="mt-3 grid grid-cols-3 gap-3">
-                                @foreach(['pending' => 'Pending', 'verified' => 'Verified', 'rejected' => 'Rejected'] as $val => $label)
-                                    <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <input type="radio" name="uploads[{{ $upload->id }}][verification_status]" value="{{ $val }}" {{ $upload->verification_status === $val ? 'checked' : '' }} class="h-4 w-4">
-                                        <span class="text-sm">{{ $label }}</span>
-                                    </label>
-                                @endforeach
-                            </div>
+
                         </div>
                     @endforeach
                 </div>

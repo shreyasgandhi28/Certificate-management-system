@@ -1,92 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Certificate</title>
+    <title>Certificate of Achievement</title>
     <style>
         body {
             font-family: 'Times New Roman', serif;
-            background: #f9f9f9;
+            text-align: center;
+            background: #f8f9fa;
             margin: 0;
-            padding: 40px;
+            padding: 0;
         }
 
         .certificate-container {
-            background: #fff;
-            padding: 60px;
-            text-align: center;
-            border: 12px solid #bfa14a; /* golden outer border */
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 50px;
+            border: 10px solid #003a68;
             border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            position: relative;
-        }
-
-        /* Inner decorative border */
-        .certificate-container::before {
-            content: "";
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
-            border: 6px dashed #d4af37;
-            border-radius: 10px;
-            pointer-events: none;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
 
         .certificate-title {
-            font-size: 42px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        .certificate-body {
-            font-size: 20px;
-            margin: 20px 0;
-            line-height: 1.6;
-        }
-
-        .recipient-name {
             font-size: 32px;
             font-weight: bold;
-            color: #222;
-            margin: 30px 0;
-            text-decoration: underline;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 40px;
+        }
+
+        .recipient {
+            font-size: 26px;
+            font-weight: bold;
+            color: #000;
+            margin: 20px 0;
+            border-bottom: 2px solid #d4af37;
+            display: inline-block;
+            padding: 5px 30px;
+        }
+
+        .content {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #333;
         }
 
         .footer {
-            margin-top: 50px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 16px;
+            margin-top: 80px;
+            position: relative;
+            padding: 0 40px;
+            min-height: 100px;
         }
 
-        .footer div {
-            text-align: center;
-            width: 45%;
+        .signature, .date {
+            width: 200px;
+            position: relative;
+        }
+
+        .signature {
+            text-align: left;
+        }
+
+        .date {
+            position: absolute;
+            right: 40px;
+            bottom: 0;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 150px;
+            margin-bottom: 5px;
+        }
+
+        .logo {
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="certificate-container">
-        <h1 class="certificate-title">Certificate of Achievement</h1>
-        <p class="certificate-body">This certificate is proudly presented to</p>
+        <div class="logo">
+            <!-- Logo removed as it was causing issues -->
+        </div>
 
-        <div class="recipient-name">{{ $name }}</div>
+        <div class="certificate-title">CERTIFICATE OF ACHIEVEMENT</div>
+        <div class="subtitle">This certificate is proudly presented to</div>
 
-        <p class="certificate-body">For successfully completing the course</p>
-        <p class="certificate-body"><strong>{{ $course ?? '_________' }}</strong></p>
+        <div class="recipient">{{ $name ?? 'Recipient Name' }}</div>
+
+        <div class="content">
+            In recognition of outstanding dedication and achievement.<br>
+            Awarded with appreciation for your efforts and accomplishments.
+        </div>
 
         <div class="footer">
-            <div>
-                <hr style="width:80%; margin:auto; border:1px solid #000;">
-                <p>Authorized Signatory</p>
+            <div class="signature">
+                <div class="signature-line"></div>
+                <div>Manoj Gandhi</div>
+                <div>CEO of USS</div>
             </div>
-            <div>
-                <hr style="width:80%; margin:auto; border:1px solid #000;">
-                <p>Date</p>
+
+            <div class="date">
+                <div>{{ $issued_at ?? now()->format('F j, Y') }}</div>
+                <div class="signature-line"></div>
+                <div>Date</div>
             </div>
         </div>
     </div>

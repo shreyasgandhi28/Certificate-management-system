@@ -320,8 +320,10 @@
                 });
                 </script>
             </div>
-            <div class="mt-4">
-                {{ $applicants->links() }}
+            <div class="mt-4 flex justify-end">
+                <div class="w-full">
+                    {{ $applicants->links() }}
+                </div>
             </div>
         </div>
     </div>

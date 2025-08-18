@@ -17,6 +17,11 @@ Route::group(['middleware' => ['auth', 'role:Super Admin|Verifier|Certificate Is
         Route::post('/{applicant}/complete-verification', [ApplicantController::class, 'completeVerification'])->name('admin.applicants.complete-verification');
         Route::post('/{applicant}/reject', [ApplicantController::class, 'reject'])->name('admin.applicants.reject');
         Route::post('/{applicant}/generate-certificate', [ApplicantController::class, 'generateCertificate'])->name('admin.applicants.generate-certificate');
+        
+        // New routes for email, WhatsApp, and reset
+        Route::post('/{applicant}/send-email', [ApplicantController::class, 'sendEmail'])->name('admin.applicants.send-email');
+        Route::post('/{applicant}/send-whatsapp', [ApplicantController::class, 'sendWhatsApp'])->name('admin.applicants.send-whatsapp');
+        Route::post('/{applicant}/reset-verification', [ApplicantController::class, 'resetVerification'])->name('admin.applicants.reset-verification');
     });
 
     // Document Viewing

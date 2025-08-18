@@ -3,6 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+// Include test routes (remove in production)
+if (app()->environment('local')) {
+    require __DIR__.'/test-email.php';
+    require __DIR__.'/test-whatsapp.php';
+}
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -16,6 +22,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Public Certificate View Route
+Route::get('/certificate/{certificate}', [App\Http\Controllers\Admin\CertificateController::class, 'view'])
+    ->name('certificate.view');
 
 // Public Application Routes (basic throttling)
 Route::prefix('apply')->name('apply.')->middleware('throttle:30,1')->group(function () {

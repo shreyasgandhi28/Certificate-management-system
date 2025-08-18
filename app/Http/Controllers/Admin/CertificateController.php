@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Jobs\SendCertificateEmail;
 use App\Jobs\SendCertificateWhatsApp;
+use App\Mail\CertificateEmail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,8 +85,37 @@ class CertificateController extends Controller
 
     public function sendEmail(Certificate $certificate): RedirectResponse
     {
-        SendCertificateEmail::dispatch($certificate)->onQueue('mail');
-        return back()->with('success', 'Email dispatch queued.');
+        try {
+            // Generate the certificate URL (you might need to adjust this based on your route structure)
+            $certificateUrl = route('certificate.view', ['certificate' => $certificate->id]);
+            
+            // Send the email
+            Mail::to($certificate->applicant->email)
+                ->send(new CertificateEmail($certificate, $certificateUrl));
+            
+            // Update certificate status
+            $certificate->update([
+                'email_sent_at' => now(),
+                'send_attempts' => ($certificate->send_attempts ?? 0) + 1,
+                'last_attempt_at' => now(),
+                'status' => 'emailed'
+            ]);
+            
+            return back()->with('success', 'Certificate email sent successfully to ' . $certificate->applicant->email);
+            
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Failed to send certificate email: ' . $e->getMessage());
+            
+            // Update certificate with error
+            $certificate->update([
+                'last_error' => $e->getMessage(),
+                'last_attempt_at' => now(),
+                'send_attempts' => ($certificate->send_attempts ?? 0) + 1
+            ]);
+            
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
     }
 
     public function sendWhatsApp(Certificate $certificate): RedirectResponse

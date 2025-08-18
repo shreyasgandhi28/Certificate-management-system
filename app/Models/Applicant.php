@@ -17,6 +17,7 @@ class Applicant extends Model
     protected $fillable = [
         'name',
         'email',
+        'country_code',
         'phone',
         'gender',
         'date_of_birth',

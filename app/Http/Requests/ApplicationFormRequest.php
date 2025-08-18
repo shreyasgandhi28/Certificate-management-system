@@ -16,7 +16,8 @@ class ApplicationFormRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'regex:/^[0-9]{10,15}$/'],
+            'country_code' => ['required', 'string', 'max:5'],
+            'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
             'gender' => ['required', 'in:male,female,other'],
             'date_of_birth' => ['required', 'date', 'before:today'],
             'educational_details' => ['nullable', 'string', 'max:5000'],
@@ -36,7 +37,9 @@ class ApplicationFormRequest extends FormRequest
         return [
             'name.required' => 'Please enter your full name.',
             'email.required' => 'Please enter a valid email address.',
-            'phone.regex' => 'Please enter a valid phone number (10-15 digits).',
+            'country_code.required' => 'Please select a country code.',
+            'phone.required' => 'Please enter your phone number.',
+            'phone.regex' => 'Phone number must be exactly 10 digits.',
             'date_of_birth.before' => 'Date of birth must be in the past.',
             '*.mimes' => 'File must be a PDF, JPG, JPEG, or PNG.',
             '*.max' => 'File size cannot exceed 5MB.',

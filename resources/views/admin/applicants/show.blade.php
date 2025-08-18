@@ -240,16 +240,31 @@
 
                     @if(auth()->user()->hasAnyRole(['Super Admin','Certificate Issuer']))
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('admin.applicants.edit', $applicant) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            <!-- New Action Buttons -->
+                            <form action="{{ route('admin.applicants.send-email', $applicant) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" title="Send Email">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    Email
+                                </button>
+                            </form>
+                            
+                            <button type="button" 
+                                    x-on:click="$dispatch('open-whatsapp-modal', { message: 'Hello ' + '{{ addslashes($applicant->name) }}' })"
+                                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg hover:bg-green-50 dark:hover:bg-green-800/50 transition-colors"
+                                    title="Send WhatsApp">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.498 14.382v-.001c-.301-.15-1.767-.867-2.143-.967-.273-.073-.473-.107-.673.107-.2.214-.77.834-.95.992-.172.15-.344.167-.624.05-.3-.1-1.263-.465-2.406-1.485-.888-.795-1.484-1.77-1.66-2.07-.174-.3-.019-.463.13-.612.136-.136.3-.357.456-.582.147-.21.194-.362.29-.6.1-.24.05-.45-.05-.63-.1-.18-.673-1.62-.922-2.22-.24-.58-.487-.51-.672-.52-.172-.01-.37-.01-.57-.01-.2 0-.52.08-.8.37-.3.31-1.15 1.12-1.15 2.73s1.17 3.17 1.33 3.39c.17.23 2.29 3.5 5.56 4.87.79.33 1.41.53 1.89.68.79.24 1.5.21 2.07.13.64-.1 1.97-.8 2.25-1.57.26-.7.26-1.3.18-1.43-.07-.13-.27-.2-.57-.32"/>
                                 </svg>
-                                Edit
-                            </a>
+                                WhatsApp
+                            </button>
+                            
                             <form action="{{ route('admin.applicants.destroy', $applicant) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" onclick="return confirm('Are you sure you want to delete this applicant?')">
+                                <button type="submit" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" onclick="return confirm('Are you sure you want to delete this applicant?')" title="Delete">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -465,5 +480,23 @@
             </div>
         </div>
     </div>
+
+    <!-- WhatsApp Modal Component -->
+    <x-whatsapp-modal :applicant="$applicant" />
 @endsection
+
+@push('scripts')
+<script>
+    // Listen for the open-whatsapp-modal event
+    document.addEventListener('open-whatsapp-modal', function(event) {
+        const modal = document.querySelector('[x-data]');
+        if (modal && modal.__x.$data) {
+            modal.__x.$data.show = true;
+            if (event.detail && event.detail.message) {
+                modal.__x.$data.message = event.detail.message;
+            }
+        }
+    });
+</script>
+@endpush
 

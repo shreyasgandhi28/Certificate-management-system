@@ -73,7 +73,8 @@ class ApplicantController extends Controller
         $validated = $request->validate([
             'name' => ['required','string','max:255'],
             'email' => ['required','email','max:255'],
-            'phone' => ['nullable','string','max:30'],
+            'country_code' => ['required','string','max:5'],
+            'phone' => ['required','string','regex:/^[0-9]{10}$/'],
             'status' => ['required','in:pending,in_verification,verified,rejected,certificate_generated']
         ]);
 
@@ -328,6 +329,132 @@ class ApplicantController extends Controller
             
             return redirect()->route('admin.applicants.show', $applicant)
                 ->with('error', 'Failed to generate certificate: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send email to the applicant
+     */
+    public function sendEmail(Request $request, Applicant $applicant)
+    {
+        try {
+            // Here you would typically send an email to the applicant
+            // For example: 
+            // Mail::to($applicant->email)->send(new CustomEmail($applicant));
+            
+            // Log the action
+            AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'email_sent',
+                'target_type' => get_class($applicant),
+                'target_id' => $applicant->id,
+                'metadata' => [
+                    'email' => $applicant->email,
+                    'type' => 'custom_email'
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'Email sent successfully to ' . $applicant->email);
+            
+        } catch (\Exception $e) {
+            Log::error('Error sending email: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send WhatsApp message to the applicant
+     */
+    public function sendWhatsApp(Request $request, Applicant $applicant, WhatsAppService $whatsAppService)
+    {
+        try {
+            // Validate phone number format (10 digits)
+            if (!preg_match('/^\d{10}$/', $applicant->phone)) {
+                return back()->with('error', 'Invalid phone number format. Please ensure it has exactly 10 digits.');
+            }
+            
+            // Ensure country code is set, default to +91 if not
+            $countryCode = $applicant->country_code ?? '+91';
+            $fullPhoneNumber = $countryCode . $applicant->phone;
+            
+            // Get the message from the request or use a default message
+            $message = $request->input('message', "Hello {$applicant->name}, this is a message from our certificate management system.");
+            
+            // Send the WhatsApp message
+            $whatsAppService->sendMessage($fullPhoneNumber, $message);
+            
+            // Log the action
+            AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'whatsapp_sent',
+                'target_type' => get_class($applicant),
+                'target_id' => $applicant->id,
+                'metadata' => [
+                    'phone' => $fullPhoneNumber,
+                    'country_code' => $countryCode,
+                    'local_number' => $applicant->phone,
+                    'message' => $message,
+                    'type' => 'whatsapp_message'
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', 'WhatsApp message sent successfully to ' . $fullPhoneNumber);
+            
+        } catch (\Exception $e) {
+            Log::error('Error sending WhatsApp: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send WhatsApp: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reset verification status of an applicant
+     */
+    public function resetVerification(Request $request, Applicant $applicant)
+    {
+        try {
+            // Only allow reset if not already in pending state
+            if ($applicant->status !== 'pending') {
+                $applicant->update([
+                    'status' => 'pending',
+                    'verification_started_at' => null,
+                    'verification_started_by' => null,
+                    'verification_completed_at' => null,
+                    'verification_completed_by' => null,
+                    'verification_notes' => null,
+                    'rejected_at' => null,
+                    'rejected_by' => null,
+                    'rejection_reason' => null,
+                ]);
+
+                // Reset all uploads to pending
+                $applicant->uploads()->update(['verification_status' => 'pending']);
+
+                // Log the action
+                AuditLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'verification_reset',
+                    'target_type' => get_class($applicant),
+                    'target_id' => $applicant->id,
+                    'metadata' => [
+                        'previous_status' => $applicant->getOriginal('status'),
+                        'reset_by' => auth()->id()
+                    ],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+
+                return back()->with('success', 'Verification has been reset successfully.');
+            }
+            
+            return back()->with('info', 'Application is already in pending status.');
+            
+        } catch (\Exception $e) {
+            Log::error('Error resetting verification: ' . $e->getMessage());
+            return back()->with('error', 'Failed to reset verification: ' . $e->getMessage());
         }
     }
 }

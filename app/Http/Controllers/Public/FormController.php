@@ -49,6 +49,7 @@ class FormController extends Controller
                 [
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
+                    'country_code' => $request->input('country_code', '+91'),
                     'phone' => $request->input('phone'),
                     'gender' => $request->input('gender'),
                     'date_of_birth' => $request->input('date_of_birth'),

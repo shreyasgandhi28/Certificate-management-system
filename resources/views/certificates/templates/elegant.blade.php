@@ -11,7 +11,7 @@
             margin: 0;
             padding: 0;
         }
-
+        
         .certificate-container {
             width: 80%;
             max-width: 800px;
@@ -21,8 +21,9 @@
             border-radius: 15px;
             background: #fff;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            text-align: center;
         }
-
+        
         .certificate-title {
             font-size: 32px;
             font-weight: bold;
@@ -30,13 +31,13 @@
             margin-bottom: 10px;
             letter-spacing: 2px;
         }
-
+        
         .subtitle {
             font-size: 18px;
             color: #555;
             margin-bottom: 40px;
         }
-
+        
         .recipient {
             font-size: 26px;
             font-weight: bold;
@@ -46,45 +47,63 @@
             display: inline-block;
             padding: 5px 30px;
         }
-
+        
         .content {
             font-size: 18px;
             margin-top: 20px;
             color: #333;
         }
-
+        
         .footer {
             margin-top: 80px;
-            position: relative;
-            padding: 0 40px;
-            min-height: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+            box-sizing: border-box;
         }
-
-        .signature, .date {
-            width: 200px;
-            position: relative;
-        }
-
+        
         .signature {
             text-align: left;
+            flex: 0 0 auto;
         }
-
-        .date {
-            position: absolute;
-            right: 40px;
-            bottom: 0;
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
+        
         .signature-line {
-            border-top: 1px solid #000;
             width: 150px;
-            margin-bottom: 5px;
+            border-top: 1px solid #000;
+            margin: 0 0 5px 0;
         }
-
+        
+        .signature-name {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.2;
+        }
+        
+        .signature-title {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        
+        .date {
+            text-align: right;
+            flex: 0 0 auto;
+            margin-top: 21px; /* This moves Date up to align with Manoj Gandhi */
+        }
+        
+        .date-label {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            line-height: 1.2;
+        }
+        
+        .date-value {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.2;
+        }
+        
         .logo {
             margin-bottom: 20px;
         }
@@ -95,28 +114,29 @@
         <div class="logo">
             <!-- Logo removed as it was causing issues -->
         </div>
-
+        
         <div class="certificate-title">CERTIFICATE OF ACHIEVEMENT</div>
         <div class="subtitle">This certificate is proudly presented to</div>
-
+        
         <div class="recipient">{{ $name ?? 'Recipient Name' }}</div>
-
+        
         <div class="content">
             In recognition of outstanding dedication and achievement.<br>
             Awarded with appreciation for your efforts and accomplishments.
         </div>
-
+        
         <div class="footer">
+            <!-- Left side: Signature -->
             <div class="signature">
                 <div class="signature-line"></div>
-                <div>Manoj Gandhi</div>
-                <div>CEO of USS</div>
+                <div class="signature-name">Manoj Gandhi</div>
+                <div class="signature-title">CEO of USS</div>
             </div>
-
+            
+            <!-- Right side: Date -->
             <div class="date">
-                <div>{{ $issued_at ?? now()->format('F j, Y') }}</div>
-                <div class="signature-line"></div>
-                <div>Date</div>
+                <div class="date-label">Date</div>
+                <div class="date-value">{{ $issued_at ?? now()->format('F j, Y') }}</div>
             </div>
         </div>
     </div>

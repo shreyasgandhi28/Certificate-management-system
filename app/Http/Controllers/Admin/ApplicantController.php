@@ -270,76 +270,64 @@ class ApplicantController extends Controller
     {
         // Check if application is verified
         if ($applicant->status !== 'verified') {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Certificates can only be generated for verified applications.'
-                ], 422);
-            }
-            return back()->with('error', 'Certificates can only be generated for verified applications.');
+            return redirect()->route('admin.applicants.index')
+                ->with('error', 'Certificates can only be generated for verified applications.');
         }
 
         $request->validate([
             'template_id' => 'required|exists:certificate_templates,id'
         ]);
 
+        // Start a database transaction
+        \DB::beginTransaction();
+
         try {
-            $template = CertificateTemplate::findOrFail($request->input('template_id'));
-            
+            // Find the selected certificate template
+            $template = CertificateTemplate::findOrFail($request->template_id);
+
             // Generate the certificate
             $certificate = $certificateService->generateCertificate($applicant, $template, auth()->id());
+
+            // Update verification details
+            $applicant->update([
+                'verification_completed_at' => now(),
+                'verification_completed_by' => auth()->id()
+            ]);
 
             // Create audit log
             AuditLog::create([
                 'user_id' => auth()->id(),
                 'action' => 'certificate_generated',
-                'target_type' => Applicant::class,
-                'target_id' => $applicant->id,
+                'target_type' => get_class($certificate),
+                'target_id' => $certificate->id,
                 'metadata' => [
-                    'certificate_id' => $certificate->id,
+                    'applicant_id' => $applicant->id,
                     'serial_number' => $certificate->serial_number,
-                    'template_id' => $template->id,
                     'template_name' => $template->name
                 ],
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
 
-            // Update applicant status to certificate_generated
-            $applicant->update(['status' => 'certificate_generated']);
-
             // Queue email notification
             Notification::route('mail', $applicant->email)
                 ->notify(new CertificateGeneratedNotification($certificate));
 
-            // Return JSON response for AJAX requests
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Certificate generated successfully.',
-                    'certificate' => [
-                        'id' => $certificate->id,
-                        'serial_number' => $certificate->serial_number,
-                        'download_url' => route('admin.certificates.download', $certificate),
-                        'view_url' => route('admin.certificates.view', $certificate)
-                    ]
-                ]);
-            }
+            // Commit the transaction
+            \DB::commit();
 
-            return redirect()->route('admin.applicants.show', $applicant)
-                ->with('success', 'Certificate generated successfully.');
+            return redirect()->route('admin.applicants.index')
+                ->with('success', 'Certificate generated successfully for ' . $applicant->name);
 
         } catch (\Exception $e) {
-            \Log::error('Error generating certificate: ' . $e->getMessage());
+            // Rollback the transaction on error
+            \DB::rollBack();
             
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to generate certificate. Please try again.'
-                ], 500);
-            }
-
-            return back()->with('error', 'Failed to generate certificate. Please try again.');
+            Log::error('Error generating certificate: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return redirect()->route('admin.applicants.show', $applicant)
+                ->with('error', 'Failed to generate certificate: ' . $e->getMessage());
         }
     }
 }

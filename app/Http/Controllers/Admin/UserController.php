@@ -72,43 +72,112 @@ class UserController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, User $user)
+    public function deactivate(User $user, Request $request)
     {
-        $request->validate([
-            'is_active' => 'required|boolean'
-        ]);
-
-        $user->update([
-            'is_active' => $request->is_active
+        abort_if(!auth()->user()->hasRole('Super Admin'), 403);
+        
+        // Use direct DB query to update the status
+        $result = \DB::table('users')
+            ->where('id', $user->id)
+            ->update(['is_active' => false]);
+            
+        // Refresh the user model to get updated data
+        $user->refresh();
+        
+        \Log::info('Direct DB update result', [
+            'rows_affected' => $result,
+            'user_id' => $user->id,
+            'new_status' => $user->is_active
         ]);
 
         // Log the action
         AuditLog::create([
             'user_id' => auth()->id(),
-            'action' => 'Updated user status',
-            'description' => 'Changed status of user ' . $user->email . ' to ' . ($request->is_active ? 'active' : 'inactive'),
+            'action' => 'user_deactivated',
+            'description' => 'Deactivated user ' . $user->email,
             'model_type' => get_class($user),
             'model_id' => $user->id,
-            'properties' => $user->toJson()
+            'properties' => $user->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
         ]);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User status updated successfully');
+        return back()->with('success', 'User deactivated successfully');
     }
 
-    public function destroy(User $user)
+    public function activate(User $user, Request $request)
     {
         abort_if(!auth()->user()->hasRole('Super Admin'), 403);
+        
+        // Use direct DB query to update the status
+        $result = \DB::table('users')
+            ->where('id', $user->id)
+            ->update(['is_active' => true]);
+            
+        // Refresh the user model to get updated data
+        $user->refresh();
+
+        // Log the action
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'user_activated',
+            'description' => 'Activated user ' . $user->email,
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'properties' => $user->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
+        return back()->with('success', 'User activated successfully');
+    }
+
+    public function destroy(User $user, Request $request)
+    {
+        abort_if(!auth()->user()->hasRole('Super Admin'), 403);
+        
+        // Prevent deleting self
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+        
         $user->delete();
+        
+        // Log the action
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'user_deleted',
+            'description' => 'Moved user ' . $user->email . ' to trash',
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'properties' => $user->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+        
         return back()->with('success', 'User moved to trash.');
     }
 
-    public function restore($id)
+    public function restore($id, Request $request)
     {
         abort_if(!auth()->user()->hasRole('Super Admin'), 403);
+        
         $user = User::withTrashed()->findOrFail($id);
         $user->restore();
-        return back()->with('success', 'User restored.');
+        
+        // Log the action
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'user_restored',
+            'description' => 'Restored user ' . $user->email . ' from trash',
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'properties' => $user->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+        
+        return back()->with('success', 'User restored successfully.');
     }
 
     public function updateRoles(Request $request, User $user)
@@ -172,37 +241,4 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success','User created.');
     }
-
-    public function inviteForm()
-    {
-        abort_if(!auth()->user()->hasRole('Super Admin'), 403);
-        $roles = Role::orderBy('name')->pluck('name');
-        return view('admin.users.invite', compact('roles'));
-    }
-
-    public function sendInvite(Request $request)
-    {
-        abort_if(!auth()->user()->hasRole('Super Admin'), 403);
-        $validated = $request->validate([
-            'name' => ['required','string','max:255'],
-            'email' => ['required','email','max:255'],
-            'roles' => ['array'],
-            'roles.*' => ['string']
-        ]);
-
-        $invitation = \App\Models\UserInvitation::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'roles' => array_values($validated['roles'] ?? []),
-            'token' => \Str::uuid()->toString(),
-            'invited_by' => $request->user()->id,
-            'expires_at' => now()->addDays(7),
-        ]);
-
-        $invitation->notify(new \App\Notifications\UserInvitationNotification($invitation));
-
-        return redirect()->route('admin.users.index')->with('success','Invitation sent.');
-    }
 }
-
-

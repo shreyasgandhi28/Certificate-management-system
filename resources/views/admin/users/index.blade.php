@@ -9,6 +9,14 @@
         <h1 class="text-lg font-semibold card-text-primary">Users</h1>
         
         <div class="flex items-center gap-3">
+            <!-- Create User Button -->
+            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Create User
+            </a>
+            
             <!-- Filter Button -->
             <div class="relative inline-block">
                 <button @click="showFilter = !showFilter" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-all">
@@ -97,25 +105,10 @@
                 </div>
             </div>
 
-            <!-- Action buttons are now in the table header -->
         </div>
     </div>
 
     <div class="overflow-x-auto">
-        <div class="flex items-center justify-end mb-3 gap-2">
-            <a href="{{ route('admin.users.invite') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                Invite User
-            </a>
-            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-colors">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Create User
-            </a>
-        </div>
         <table class="w-full">
             <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
@@ -245,26 +238,34 @@
                     </td>
                     <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
-
                             @if(!$user->trashed())
                                 @if($user->is_active)
-                                <form method="POST" action="{{ route('admin.users.update-status', $user) }}" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="is_active" value="0">
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs rounded-md btn-warning">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
-                                        Deactivate
-                                    </button>
-                                </form>
+                                    <form method="POST" action="{{ route('admin.users.deactivate', $user) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs rounded-md btn-warning hover:bg-yellow-600" onclick="return confirm('Are you sure you want to deactivate this user?')">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            Deactivate
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs rounded-md btn-success hover:bg-green-600">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Activate
+                                        </button>
+                                    </form>
                                 @endif
                                 
                                 <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs rounded-md btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs rounded-md btn-danger hover:bg-red-600" 
+                                        onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>

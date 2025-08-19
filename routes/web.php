@@ -55,17 +55,23 @@ Route::middleware(['auth','role:Super Admin|Verifier|Certificate Issuer'])->pref
     Route::post('/certificates/{certificate}/send-email', [\App\Http\Controllers\Admin\CertificateController::class, 'sendEmail'])->name('certificates.send-email');
     Route::post('/certificates/{certificate}/send-whatsapp', [\App\Http\Controllers\Admin\CertificateController::class, 'sendWhatsApp'])->name('certificates.send-whatsapp');
     Route::post('/certificates/{certificate}/reset', [\App\Http\Controllers\Admin\CertificateController::class, 'resetStatus'])->name('certificates.reset-status');
-    // Users Management
-    Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
-    Route::post('/users/{user}/roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.update-roles');
-    Route::patch('/users/{user}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.update-status');
-    Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{id}/restore', [App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
-    // User creation (Super Admin only guarded inside controller)
-    Route::get('/users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
-    Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
-    Route::get('/users/invite', [App\Http\Controllers\Admin\UserController::class, 'inviteForm'])->name('users.invite');
-    Route::post('/users/invite', [App\Http\Controllers\Admin\UserController::class, 'sendInvite'])->name('users.send-invite');
+    // Users Management (Super Admin only)
+    Route::middleware(['role:Super Admin'])->group(function () {
+        Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
+        
+        // User status management
+        Route::post('/users/{user}/deactivate', [App\Http\Controllers\Admin\UserController::class, 'deactivate'])->name('users.deactivate');
+        Route::post('/users/{user}/activate', [App\Http\Controllers\Admin\UserController::class, 'activate'])->name('users.activate');
+        
+        // User roles management
+        Route::post('/users/{user}/roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.update-roles');
+        
+        // User soft delete/restore
+        Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{user}/restore', [App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
+    });
 });
 
 

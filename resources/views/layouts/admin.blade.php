@@ -17,6 +17,14 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -27,6 +35,35 @@
     <style>
         html.dark {
             color-scheme: dark !important;
+        }
+        
+        /* Select2 Dark Mode */
+        .select2-container--default.select2-dark .select2-selection--multiple,
+        .select2-container--default.select2-dark .select2-selection--single,
+        .select2-container--default.select2-dark .select2-search--dropdown .select2-search__field,
+        .select2-container--default.select2-dark .select2-results__option,
+        .select2-dropdown {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+            color: #f3f4f6 !important;
+        }
+        
+        .select2-container--default.select2-dark .select2-selection--multiple .select2-selection__choice {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #f3f4f6 !important;
+        }
+        
+        .select2-container--default.select2-dark .select2-selection--multiple .select2-selection__choice__remove {
+            color: #9ca3af !important;
+        }
+        
+        .select2-container--default.select2-dark .select2-results__option--highlighted[aria-selected] {
+            background-color: #3b82f6 !important;
+        }
+        
+        .select2-container--default.select2-dark .select2-search--inline .select2-search__field {
+            color: #f3f4f6 !important;
         }
         
         /* Sidebar structure with proper toggle */
@@ -515,6 +552,7 @@
                         Certificates
                     </a>
 
+                    @role('Super Admin')
                     <!-- Users -->
                     <a href="{{ route('admin.users.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.users.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'nav-link hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">
                         <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,6 +560,7 @@
                         </svg>
                         Users
                     </a>
+                    @endrole
                 </div>
             </nav>
         </div>
@@ -654,5 +693,45 @@
             </div>
         </main>
     </div>
+
+    <script>
+        // Initialize Select2 for all select2 elements
+        document.addEventListener('DOMContentLoaded', function() {
+            $('.select2').select2({
+                theme: 'bootstrap',
+                width: '100%',
+                placeholder: 'Select an option',
+                allowClear: true
+            });
+            
+            // Fix for dark mode
+            const darkMode = document.documentElement.classList.contains('dark');
+            updateSelect2Theme(darkMode);
+            
+            // Watch for dark mode changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        const isDark = document.documentElement.classList.contains('dark');
+                        updateSelect2Theme(isDark);
+                    }
+                });
+            });
+            
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+            
+            function updateSelect2Theme(isDark) {
+                const $select2 = $('.select2-container--default');
+                if (isDark) {
+                    $select2.addClass('select2-dark');
+                } else {
+                    $select2.removeClass('select2-dark');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

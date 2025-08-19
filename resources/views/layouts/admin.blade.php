@@ -644,8 +644,8 @@
                                 style="z-index: 1000;"
                             >
                                 <div class="py-1">
-                                    <a href="#" @click.stop class="group flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-700">Profile</a>
-                                    <a href="#" @click.stop class="group flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-700">Settings</a>
+                                    <a href="{{ route('profile.edit') }}" @click.stop class="group flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-700">Profile</a>
+                                    <a href="{{ route('profile.edit') }}" @click.stop class="group flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-700">Settings</a>
                                 </div>
                                 <div class="py-1">
                                     <form method="POST" action="{{ route('logout') }}">

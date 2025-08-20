@@ -23,6 +23,7 @@ class DashboardController extends Controller
             'total_uploads' => Upload::whereHas('applicant', function($q) {
                 $q->whereNull('deleted_at');
             })->count(),
+            'certificates_generated' => \App\Models\Certificate::count(),
         ];
 
         // Get monthly data for the last 12 months

@@ -73,6 +73,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- Certificates Generated -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium card-text-secondary">Certificates Generated</p>
+                    <p class="text-2xl lg:text-3xl font-bold card-text-primary mt-2">{{ number_format($stats['certificates_generated']) }}</p>
+                    @php
+                        $avgCertificates = $stats['total_applications'] > 0 
+                            ? round($stats['certificates_generated'] / $stats['total_applications'], 1)
+                            : 0;
+                    @endphp
+                    <p class="text-purple-600 dark:text-purple-400 text-sm font-medium mt-1">{{ $avgCertificates }} per application</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Charts Section - Side-by-Side Layout -->
@@ -233,20 +254,11 @@
                         </td>
                         <td class="py-4 px-4">
                             @if($applicant->status === 'pending' || $applicant->status === 'in_verification')
-                                <div class="flex items-center">
-                                    <div class="legend-dot-pending"></div>
-                                    <span class="text-sm font-medium card-text-primary">Pending</span>
-                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400">Pending</span>
                             @elseif($applicant->status === 'verified')
-                                <div class="flex items-center">
-                                    <div class="legend-dot-verified"></div>
-                                    <span class="text-sm font-medium card-text-primary">Verified</span>
-                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">Verified</span>
                             @else
-                                <div class="flex items-center">
-                                    <div class="legend-dot-rejected"></div>
-                                    <span class="text-sm font-medium card-text-primary">Rejected</span>
-                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400">Rejected</span>
                             @endif
                         </td>
                     @endif

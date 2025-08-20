@@ -213,30 +213,39 @@
 
             @if($applicant->status === 'verified')
                 <div class="flex items-center justify-between w-full gap-4">
-                    <form action="{{ route('admin.applicants.generate-certificate', $applicant) }}" method="POST" class="flex items-center gap-3">
-                        @csrf
-                        <div class="relative w-72">
-                            <select name="template_id" id="template_id" 
-                                class="block w-full h-10 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 appearance-none" 
-                                required>
-                                <option value="">Select Certificate Template</option>
-                                @foreach(\App\Models\CertificateTemplate::where('active', true)->get() as $template)
-                                    <option value="{{ $template->id }}">{{ $template->name }}</option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                    @if(!$applicant->hasCertificate())
+                        <form action="{{ route('admin.applicants.generate-certificate', $applicant) }}" method="POST" class="flex items-center gap-3">
+                            @csrf
+                            <div class="relative w-72">
+                                <select name="template_id" id="template_id" 
+                                    class="block w-full h-10 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 appearance-none" 
+                                    required>
+                                    <option value="">Select Certificate Template</option>
+                                    @foreach(\App\Models\CertificateTemplate::where('active', true)->get() as $template)
+                                        <option value="{{ $template->id }}">{{ $template->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                             </div>
-                        </div>
-                        <button type="submit" class="generate-certificate-btn">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button type="submit" class="generate-certificate-btn">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Generate Certificate
+                            </button>
+                        </form>
+                    @else
+                        <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Generate Certificate
-                        </button>
-                    </form>
+                            <span>Certificate has been generated</span>
+                        </div>
+                    @endif
 
                     @if(auth()->user()->hasAnyRole(['Super Admin','Certificate Issuer']))
                         <div class="flex items-center space-x-2">

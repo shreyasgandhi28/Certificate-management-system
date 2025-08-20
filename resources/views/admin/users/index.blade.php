@@ -168,15 +168,9 @@
                     <td class="py-3 px-4 table-text">{{ $user->email }}</td>
                     <td class="py-3 px-4">
                         @if($user->is_active)
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-                                <span class="text-sm font-medium text-green-700 dark:text-green-400">Active</span>
-                            </div>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">Active</span>
                         @else
-                            <div class="flex items-center">
-                                <div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
-                                <span class="text-sm font-medium text-red-700 dark:text-red-400">Inactive</span>
-                            </div>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400">Inactive</span>
                         @endif
                     </td>
                     <td class="py-3 px-4 table-text">

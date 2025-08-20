@@ -78,14 +78,22 @@ class ApplicantController extends Controller
             'status' => ['required','in:pending,in_verification,verified,rejected,certificate_generated']
         ]);
 
+        // Store the old status for comparison
+        $oldStatus = $applicant->status;
+        $newStatus = $request->input('status');
+
+        // Delete certificates if status is being changed to pending
+        if ($oldStatus !== 'pending' && $newStatus === 'pending' && $applicant->certificates()->exists()) {
+            $applicant->certificates()->delete();
+        }
+
         // Update the applicant
         $applicant->update($validated);
 
         // Update all uploads to match the application status
         if ($request->has('status')) {
-            $status = $request->input('status');
             // Map application status to upload verification status
-            $verificationStatus = match($status) {
+            $verificationStatus = match($newStatus) {
                 'verified', 'certificate_generated' => 'verified',
                 'rejected' => 'rejected',
                 default => 'pending'

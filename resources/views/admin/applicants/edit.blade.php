@@ -31,7 +31,7 @@
             <div class="flex space-x-2">
                 <!-- Country Code Dropdown -->
                 <div class="w-1/3">
-                    <select name="country_code" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 dark:text-gray-100" required>
+                    <select name="country_code" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 dark:text-gray-100 h-10" required>
                         <option value="" disabled>Code</option>
                         <option value="+1" {{ old('country_code', $applicant->country_code ?? '+91') === '+1' ? 'selected' : '' }}>+1 (US/CA)</option>
                         <option value="+44" {{ old('country_code', $applicant->country_code ?? '+91') === '+44' ? 'selected' : '' }}>+44 (UK)</option>
@@ -47,7 +47,7 @@
                 <div class="flex-1">
                     <input type="tel" name="phone" 
                         value="{{ old('phone', $applicant->phone) }}"
-                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 dark:text-gray-100"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-gray-700 dark:text-gray-100 h-10"
                         placeholder="1234567890" 
                         pattern="[0-9]{10}"
                         title="Please enter a valid 10-digit phone number"

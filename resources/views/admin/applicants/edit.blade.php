@@ -63,9 +63,9 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
             <select name="status" class="block w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                @foreach(['pending'=>'Pending','in_verification'=>'In Verification','verified'=>'Verified','rejected'=>'Rejected','certificate_generated'=>'Certificate Generated'] as $val=>$label)
-                    <option value="{{ $val }}" @selected(old('status',$applicant->status)===$val)>{{ $label }}</option>
-                @endforeach
+                <option value="pending" @selected(old('status', $applicant->status) === 'pending')>Pending</option>
+                <option value="verified" @selected(old('status', $applicant->status) === 'verified')>Verified</option>
+                <option value="rejected" @selected(old('status', $applicant->status) === 'rejected')>Rejected</option>
             </select>
         </div>
 

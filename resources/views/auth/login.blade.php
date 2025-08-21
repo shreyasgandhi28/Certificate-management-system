@@ -570,26 +570,6 @@
                                     Sign In to Dashboard
                                 </button>
 
-                                <!-- Divider -->
-                                <div class="relative">
-                                    <div class="absolute inset-0 flex items-center">
-                                        <div class="w-full border-t border-gray-200 dark:border-gray-600"></div>
-                                    </div>
-                                    <div class="relative flex justify-center text-sm">
-                                        <span class="px-3 bg-white dark:bg-gray-800 text-secondary">
-                                            New to the platform?
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Register Link -->
-                                @if (Route::has('register'))
-                                    <div class="text-center">
-                                        <a href="{{ route('register') }}" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
-                                            Create new account
-                                        </a>
-                                    </div>
-                                @endif
                             </form>
                         </div>
                     </div>

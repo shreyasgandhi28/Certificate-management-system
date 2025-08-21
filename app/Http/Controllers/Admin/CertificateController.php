@@ -86,19 +86,22 @@ class CertificateController extends Controller
     public function sendEmail(Certificate $certificate): RedirectResponse
     {
         try {
-            // Generate the certificate URL (you might need to adjust this based on your route structure)
+            // First, increment the attempt count
+            $certificate->increment('send_attempts');
+            $certificate->update(['last_attempt_at' => now()]);
+            
+            // Generate the certificate URL
             $certificateUrl = route('certificate.view', ['certificate' => $certificate->id]);
             
             // Send the email
             Mail::to($certificate->applicant->email)
                 ->send(new CertificateEmail($certificate, $certificateUrl));
             
-            // Update certificate status
+            // If we get here, email was sent successfully
             $certificate->update([
                 'email_sent_at' => now(),
-                'send_attempts' => ($certificate->send_attempts ?? 0) + 1,
-                'last_attempt_at' => now(),
-                'status' => 'emailed'
+                'status' => 'sent_email',
+                'last_error' => null  // Clear any previous errors
             ]);
             
             return back()->with('success', 'Certificate email sent successfully to ' . $certificate->applicant->email);
@@ -109,9 +112,7 @@ class CertificateController extends Controller
             
             // Update certificate with error
             $certificate->update([
-                'last_error' => $e->getMessage(),
-                'last_attempt_at' => now(),
-                'send_attempts' => ($certificate->send_attempts ?? 0) + 1
+                'last_error' => $e->getMessage()
             ]);
             
             return back()->with('error', 'Failed to send email: ' . $e->getMessage());

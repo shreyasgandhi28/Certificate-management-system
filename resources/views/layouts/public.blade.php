@@ -12,7 +12,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Apply') - {{ config('app.name', 'Certificate Management') }}</title>
+    <title>@yield('title', 'Certificate Management System') - {{ config('app.name', 'Certificate Management System') }}</title>
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('images/favicon-white.svg') }}" type="image/svg+xml">

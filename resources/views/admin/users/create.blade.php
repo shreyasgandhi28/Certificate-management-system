@@ -119,7 +119,6 @@
                             pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$"
                             title="Must contain at least 8 characters, including uppercase, lowercase, number and special character"
                             required
-                            oninput="validatePassword(this)"
                         >
                         <div id="password-strength" class="mt-1 text-xs"></div>
                     </div>
@@ -157,7 +156,6 @@
                         id="confirm-password"
                         class="block w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" 
                         required
-                        oninput="validatePasswordMatch()"
                     >
                     <div id="password-match" class="mt-1 text-xs text-red-500"></div>
                 </div>
@@ -236,90 +234,115 @@
 
 @push('scripts')
 <script>
-    // Password validation
-    function validatePassword(input) {
-        const password = input.value;
-        const strengthText = document.getElementById('password-strength');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password validation
+        function validatePassword(input) {
+            const password = input.value;
+            const strengthText = document.getElementById('password-strength');
+            
+            // Reset all checks
+            const lengthCheck = document.getElementById('length-check');
+            const uppercaseCheck = document.getElementById('uppercase-check');
+            const lowercaseCheck = document.getElementById('lowercase-check');
+            const numberCheck = document.getElementById('number-check');
+            const specialCheck = document.getElementById('special-check');
+            
+            // Reset classes and icons
+            [lengthCheck, uppercaseCheck, lowercaseCheck, numberCheck, specialCheck].forEach(el => {
+                el.textContent = '✗';
+                el.classList.remove('text-green-500');
+                el.classList.add('text-red-500');
+            });
+
+            // Check length
+            if (password.length >= 8) {
+                lengthCheck.textContent = '✓';
+                lengthCheck.classList.remove('text-red-500');
+                lengthCheck.classList.add('text-green-500');
+            }
+
+            // Check uppercase
+            if (/[A-Z]/.test(password)) {
+                uppercaseCheck.textContent = '✓';
+                uppercaseCheck.classList.remove('text-red-500');
+                uppercaseCheck.classList.add('text-green-500');
+            }
+
+            // Check lowercase
+            if (/[a-z]/.test(password)) {
+                lowercaseCheck.textContent = '✓';
+                lowercaseCheck.classList.remove('text-red-500');
+                lowercaseCheck.classList.add('text-green-500');
+            }
+
+            // Check number
+            if (/\d/.test(password)) {
+                numberCheck.textContent = '✓';
+                numberCheck.classList.remove('text-red-500');
+                numberCheck.classList.add('text-green-500');
+            }
+
+            // Check special character
+            if (/[^A-Za-z0-9]/.test(password)) {
+                specialCheck.textContent = '✓';
+                specialCheck.classList.remove('text-red-500');
+                specialCheck.classList.add('text-green-500');
+            }
+
+            // Update password strength
+            if (password.length === 0) {
+                strengthText.textContent = '';
+                strengthText.className = 'mt-1 text-xs';
+            } else if (password.length < 4) {
+                strengthText.textContent = 'Very Weak';
+                strengthText.className = 'mt-1 text-xs text-red-500';
+            } else if (password.length < 8) {
+                strengthText.textContent = 'Weak';
+                strengthText.className = 'mt-1 text-xs text-orange-500';
+            } else if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/.test(password)) {
+                strengthText.textContent = 'Strong';
+                strengthText.className = 'mt-1 text-xs text-green-500';
+            } else {
+                strengthText.textContent = 'Medium';
+                strengthText.className = 'mt-1 text-xs text-yellow-500';
+            }
+
+            // Also validate password match
+            validatePasswordMatch();
+        }
+
+        function validatePasswordMatch() {
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+            const matchText = document.getElementById('password-match');
+            
+            if (!password || !confirmPassword || !matchText) return;
+            
+            if (confirmPassword.value.length === 0) {
+                matchText.textContent = '';
+            } else if (password.value === confirmPassword.value) {
+                matchText.textContent = 'Passwords match';
+                matchText.className = 'mt-1 text-xs text-green-500';
+            } else {
+                matchText.textContent = 'Passwords do not match';
+                matchText.className = 'mt-1 text-xs text-red-500';
+            }
+        }
+
+        // Initialize event listeners
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
         
-        // Reset all checks
-        document.getElementById('length-check').textContent = '✗';
-        document.getElementById('length-check').classList.remove('text-green-500');
-        document.getElementById('uppercase-check').textContent = '✗';
-        document.getElementById('uppercase-check').classList.remove('text-green-500');
-        document.getElementById('lowercase-check').textContent = '✗';
-        document.getElementById('lowercase-check').classList.remove('text-green-500');
-        document.getElementById('number-check').textContent = '✗';
-        document.getElementById('number-check').classList.remove('text-green-500');
-        document.getElementById('special-check').textContent = '✗';
-        document.getElementById('special-check').classList.remove('text-green-500');
-
-        // Check length
-        if (password.length >= 8) {
-            document.getElementById('length-check').textContent = '✓';
-            document.getElementById('length-check').classList.add('text-green-500');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                validatePassword(this);
+            });
         }
-
-        // Check uppercase
-        if (/[A-Z]/.test(password)) {
-            document.getElementById('uppercase-check').textContent = '✓';
-            document.getElementById('uppercase-check').classList.add('text-green-500');
-        }
-
-        // Check lowercase
-        if (/[a-z]/.test(password)) {
-            document.getElementById('lowercase-check').textContent = '✓';
-            document.getElementById('lowercase-check').classList.add('text-green-500');
-        }
-
-        // Check number
-        if (/\d/.test(password)) {
-            document.getElementById('number-check').textContent = '✓';
-            document.getElementById('number-check').classList.add('text-green-500');
-        }
-
-        // Check special character
-        if (/[^A-Za-z0-9]/.test(password)) {
-            document.getElementById('special-check').textContent = '✓';
-            document.getElementById('special-check').classList.add('text-green-500');
-        }
-
-        // Update password strength
-        if (password.length === 0) {
-            strengthText.textContent = '';
-            strengthText.className = 'mt-1 text-xs';
-        } else if (password.length < 4) {
-            strengthText.textContent = 'Very Weak';
-            strengthText.className = 'mt-1 text-xs text-red-500';
-        } else if (password.length < 8) {
-            strengthText.textContent = 'Weak';
-            strengthText.className = 'mt-1 text-xs text-orange-500';
-        } else if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/.test(password)) {
-            strengthText.textContent = 'Strong';
-            strengthText.className = 'mt-1 text-xs text-green-500';
-        } else {
-            strengthText.textContent = 'Medium';
-            strengthText.className = 'mt-1 text-xs text-yellow-500';
-        }
-
-        // Also validate password match
-        validatePasswordMatch();
-    }
-
-    function validatePasswordMatch() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        const matchText = document.getElementById('password-match');
         
-        if (confirmPassword.length === 0) {
-            matchText.textContent = '';
-        } else if (password === confirmPassword) {
-            matchText.textContent = 'Passwords match';
-            matchText.className = 'mt-1 text-xs text-green-500';
-        } else {
-            matchText.textContent = 'Passwords do not match';
-            matchText.className = 'mt-1 text-xs text-red-500';
+        if (confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
         }
-    }
+    });
 </script>
 @endpush
 

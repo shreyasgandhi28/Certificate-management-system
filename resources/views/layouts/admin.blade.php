@@ -698,6 +698,9 @@
         </main>
     </div>
 
+    <!-- Stacked scripts -->
+    @stack('scripts')
+
     <script>
         // Initialize Select2 for all select2 elements
         document.addEventListener('DOMContentLoaded', function() {

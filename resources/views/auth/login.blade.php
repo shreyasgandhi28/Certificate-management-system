@@ -116,28 +116,48 @@
         .cert-icon:nth-child(3) { left: 70%; animation-delay: -8s; }
         .cert-icon:nth-child(4) { left: 85%; animation-delay: -15s; }
         
-        /* Card styling */
+        /* Main container */
         .login-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(18px);
-            border: 0; /* Remove white border in light mode */
-            border-radius: 22px;
-            box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.25);
+            background: transparent;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
             position: relative;
             z-index: 10;
         }
         
         .dark .login-card {
-            background: rgba(17, 24, 39, 0.92);
-            border: 1px solid rgba(75, 85, 99, 0.25);
+            background: transparent;
         }
         
-        /* Enhanced brand panel */
+        /* Form panel */
+        .w-full.lg\:w-1\/2 {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 20px 20px 0;
+            width: 55%;
+            padding: 3rem 2.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dark .w-full.lg\:w-1\/2 {
+            background: rgba(17, 24, 39, 0.95);
+        }
+        
+        /* Brand panel */
         .brand-panel {
-            background: linear-gradient(135deg, var(--brand-dark-blue), var(--brand-blue));
-            border-radius: 20px 0 0 20px;
+            background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-dark-blue) 100%);
             position: relative;
             overflow: hidden;
+            border-radius: 20px 0 0 20px;
+            box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            width: 45%;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .brand-panel::before {

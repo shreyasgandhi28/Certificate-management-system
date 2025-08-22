@@ -32,8 +32,8 @@
                  x-transition:leave-start="transform opacity-100 scale-100"
                  x-transition:leave-end="transform opacity-0 scale-95"
                  @click.outside="showFilter = false"
-                 class="fixed mt-2 w-[380px] rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/5 z-50 bg-white dark:bg-gray-800"
-                 style="display: none; right: 1rem; top: 5rem;">
+                 class="fixed mt-2 w-[380px] rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/10 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
+                 style="display: none; right: 1rem; top: 5rem; max-height: 80vh; overflow-y: auto;">
                 <div class="p-4">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-base font-medium text-gray-900 dark:text-white">Filter Documents</h3>
@@ -48,18 +48,18 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Applicant (name or email)</label>
                             <input type="text" name="applicant" value="{{ request('applicant') }}" placeholder="e.g. John or john@email.com"
-                                   class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent bg-white/80 dark:bg-gray-800/80 dark:text-gray-300">
+                                   class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                         </div>
 
                         <div class="grid grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filename</label>
                                 <input type="text" name="filename" value="{{ request('filename') }}" placeholder="original filename"
-                                       class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                       class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type</label>
-                                <select name="type" class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                <select name="type" class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                                     <option value="">All</option>
                                     @foreach(['tenth'=>'10th','twelfth'=>'12th','graduation'=>'Graduation','masters'=>"Master's"] as $val=>$label)
                                         <option value="{{ $val }}" @selected(request('type')===$val)>{{ $label }}</option>
@@ -71,46 +71,35 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Application ID</label>
                             <input type="number" name="applicant_id" value="{{ request('applicant_id') }}" placeholder="e.g. 5"
-                                   class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                   class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verification Status</label>
-                            <div class="space-y-3">
-                                <label class="relative flex items-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                    <input type="radio" name="status" value="pending" {{ request('status') === 'pending' ? 'checked' : '' }} class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500">
-                                    <div class="flex items-center gap-2 ml-2">
-                                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                                        <span class="text-sm">Pending</span>
-                                    </div>
-                                </label>
-                                <label class="relative flex items-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                    <input type="radio" name="status" value="verified" {{ request('status') === 'verified' ? 'checked' : '' }} class="h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500">
-                                    <div class="flex items-center gap-2 ml-2">
-                                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                                        <span class="text-sm">Verified</span>
-                                    </div>
-                                </label>
-                                <label class="relative flex items-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                    <input type="radio" name="status" value="rejected" {{ request('status') === 'rejected' ? 'checked' : '' }} class="h-4 w-4 text-red-600 border-gray-300 focus:ring-red-500">
-                                    <div class="flex items-center gap-2 ml-2">
-                                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                                        <span class="text-sm">Rejected</span>
-                                    </div>
-                                </label>
-                            </div>
+                            <select name="status" class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
+                                <option value="">All Statuses</option>
+                                <option value="pending" @selected(request('status') === 'pending')>
+                                    Pending
+                                </option>
+                                <option value="verified" @selected(request('status') === 'verified')>
+                                    Verified
+                                </option>
+                                <option value="rejected" @selected(request('status') === 'rejected')>
+                                    Rejected
+                                </option>
+                            </select>
                         </div>
 
                         <div class="grid grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">From</label>
                                 <input type="date" name="from" value="{{ request('from') }}"
-                                       class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                       class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">To</label>
                                 <input type="date" name="to" value="{{ request('to') }}"
-                                       class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                       class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                             </div>
                         </div>
 

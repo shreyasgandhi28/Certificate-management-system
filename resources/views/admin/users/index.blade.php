@@ -33,15 +33,15 @@
 
                 <!-- Filter Dropdown -->
                 <div x-show="showFilter"
-                    x-transition:enter="transition ease-out duration-100"
-                    x-transition:enter-start="transform opacity-0 scale-95"
-                    x-transition:enter-end="transform opacity-100 scale-100"
-                    x-transition:leave="transition ease-in duration-75"
-                    x-transition:leave-start="transform opacity-100 scale-100"
-                    x-transition:leave-end="transform opacity-0 scale-95"
+                    x-transition:enter="transition ease-out duration-100" 
+                    x-transition:enter-start="transform opacity-0 scale-95" 
+                    x-transition:enter-end="transform opacity-100 scale-100" 
+                    x-transition:leave="transition ease-in duration-75" 
+                    x-transition:leave-start="transform opacity-100 scale-100" 
+                    x-transition:leave-end="transform opacity-0 scale-95" 
                     @click.outside="showFilter = false"
-                    class="fixed mt-2 w-[380px] rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/5 z-50 bg-white dark:bg-gray-800"
-                    style="display: none; right: 1rem; top: 5rem;">
+                    class="fixed mt-2 w-[380px] rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/10 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
+                    style="display: none; right: 1rem; top: 5rem; max-height: 80vh; overflow-y: auto;">
                     
                     <form method="GET" class="space-y-4 p-4">
                         <div class="flex items-center justify-between">
@@ -58,13 +58,13 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search</label>
                             <input type="text" name="q" value="{{ request('q') }}" placeholder="Name or email"
-                                class="block w-full px-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                         </div>
 
                         <!-- Role Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
-                            <select name="role" class="block w-full px-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                            <select name="role" class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                                 <option value="">All Roles</option>
                                 @foreach($roles as $role)
                                     <option value="{{ $role }}" @selected(request('role') === $role)>{{ ucfirst($role) }}</option>
@@ -75,7 +75,7 @@
                         <!-- Status Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-                            <select name="status" class="block w-full px-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                            <select name="status" class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                                 <option value="">All Statuses</option>
                                 <option value="active" @selected(request('status') === 'active')>Active</option>
                                 <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
@@ -87,12 +87,12 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">From</label>
                                 <input type="date" name="from" value="{{ request('from') }}"
-                                    class="block w-full px-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                    class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">To</label>
                                 <input type="date" name="to" value="{{ request('to') }}"
-                                    class="block w-full px-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                    class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                             </div>
                         </div>
 

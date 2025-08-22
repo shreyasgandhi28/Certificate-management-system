@@ -50,8 +50,8 @@
                          x-transition:leave-start="transform opacity-100 scale-100" 
                          x-transition:leave-end="transform opacity-0 scale-95" 
                          @click.outside="showFilter = false"
-                         class="fixed mt-2 w-[380px] rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/5 z-50 bg-white dark:bg-gray-800"
-                         style="display: none; right: 1rem; top: 5rem;">
+                         class="fixed mt-2 w-[380px] rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/10 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
+                         style="display: none; right: 1rem; top: 5rem; max-height: 80vh; overflow-y: auto;">
                         <div class="p-4">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-base font-medium text-gray-900 dark:text-white">Filter Applicants</h3>
@@ -70,7 +70,7 @@
                                            name="name" 
                                            value="{{ request('name') }}" 
                                            placeholder="Filter by name"
-                                           class="block w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-800 dark:text-gray-300">
+                                           class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                                 </div>
 
                                 <!-- Advanced Filters -->
@@ -90,29 +90,21 @@
                                 <!-- Status Filter -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-                                    <div class="space-y-3">
-                                        <label class="relative flex items-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" :class="{ 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10': $refs.pendingStatus.checked }">
-                                            <input x-ref="pendingStatus" type="radio" name="status" value="pending" {{ request('status') === 'pending' ? 'checked' : '' }} class="h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-500">
-                                            <div class="flex items-center gap-2 ml-2" :class="{ 'text-yellow-600 font-medium': $refs.pendingStatus.checked }">
-                                                <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                                                <span class="text-sm">Pending</span>
-                                            </div>
-                                        </label>
-                                        <label class="relative flex items-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" :class="{ 'border-green-500 bg-green-50 dark:bg-green-900/10': $refs.verifiedStatus.checked }">
-                                            <input x-ref="verifiedStatus" type="radio" name="status" value="verified" {{ request('status') === 'verified' ? 'checked' : '' }} class="h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500">
-                                            <div class="flex items-center gap-2 ml-2" :class="{ 'text-green-600 font-medium': $refs.verifiedStatus.checked }">
-                                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                                                <span class="text-sm">Verified</span>
-                                            </div>
-                                        </label>
-                                        <label class="relative flex items-center px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" :class="{ 'border-red-500 bg-red-50 dark:bg-red-900/10': $refs.rejectedStatus.checked }">
-                                            <input x-ref="rejectedStatus" type="radio" name="status" value="rejected" {{ request('status') === 'rejected' ? 'checked' : '' }} class="h-4 w-4 text-red-600 border-gray-300 focus:ring-red-500">
-                                            <div class="flex items-center gap-2 ml-2" :class="{ 'text-red-600 font-medium': $refs.rejectedStatus.checked }">
-                                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                                                <span class="text-sm">Rejected</span>
-                                            </div>
-                                        </label>
-                                    </div>
+                                    <select name="status" class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
+                                        <option value="">All Statuses</option>
+                                        <option value="pending" @selected(request('status') === 'pending') class="flex items-center">
+                                            <span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
+                                            Pending
+                                        </option>
+                                        <option value="verified" @selected(request('status') === 'verified') class="flex items-center">
+                                            <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                                            Verified
+                                        </option>
+                                        <option value="rejected" @selected(request('status') === 'rejected') class="flex items-center">
+                                            <span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                                            Rejected
+                                        </option>
+                                    </select>
                                 </div>
 
                                 <!-- Application ID -->

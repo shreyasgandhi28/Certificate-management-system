@@ -89,7 +89,7 @@
 
                                 <!-- Status Filter -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verification Status</label>
                                     <select name="status" class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
                                         <option value="">All Statuses</option>
                                         <option value="pending" @selected(request('status') === 'pending') class="flex items-center">
@@ -103,6 +103,20 @@
                                         <option value="rejected" @selected(request('status') === 'rejected') class="flex items-center">
                                             <span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
                                             Rejected
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Certificate Status Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Certificate Status</label>
+                                    <select name="certificate_status" class="block w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:text-gray-300">
+                                        <option value="">All Statuses</option>
+                                        <option value="pending" @selected(request('certificate_status') === 'pending')>
+                                            Pending
+                                        </option>
+                                        <option value="generated" @selected(request('certificate_status') === 'generated')>
+                                            Generated
                                         </option>
                                     </select>
                                 </div>
@@ -155,17 +169,40 @@
             </div>
 
             <!-- Active Filters Display -->
-            @if(request()->hasAny(['name','email','phone','status','submitted_at','id']))
+            @if(request()->hasAny(['name','email','phone','status','certificate_status','submitted_at','id']))
             <div class="flex flex-wrap items-center gap-2 mb-4">
-                @foreach(['name'=>'Name','email'=>'Email','phone'=>'Phone','status'=>'Status','submitted_at'=>'Date','id'=>'Application ID'] as $key=>$label)
+                @if(request('status'))
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        Verification: {{ ucfirst(request('status')) }}
+                        <a href="{{ request()->fullUrlWithQuery(['status' => null]) }}" class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-200 dark:bg-blue-800 hover:bg-blue-300 dark:hover:bg-blue-700">
+                            <span class="sr-only">Remove status filter</span>
+                            <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                                <path fill-rule="evenodd" d="M4 3.293l2.146-2.147a.5.5 0 01.708.708L4.707 4l2.147 2.146a.5.5 0 01-.708.708L4 4.707l-2.146 2.147a.5.5 0 01-.708-.708L3.293 4 1.146 1.854a.5.5 0 01.708-.708L4 3.293z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </span>
+                @endif
+                
+                @if(request('certificate_status'))
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                        Certificate: {{ ucfirst(request('certificate_status')) }}
+                        <a href="{{ request()->fullUrlWithQuery(['certificate_status' => null]) }}" class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-indigo-200 dark:bg-indigo-800 hover:bg-indigo-300 dark:hover:bg-indigo-700">
+                            <span class="sr-only">Remove certificate status filter</span>
+                            <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                                <path fill-rule="evenodd" d="M4 3.293l2.146-2.147a.5.5 0 01.708.708L4.707 4l2.147 2.146a.5.5 0 01-.708.708L4 4.707l-2.146 2.147a.5.5 0 01-.708-.708L3.293 4 1.146 1.854a.5.5 0 01.708-.708L4 3.293z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </span>
+                @endif
+                
+                @foreach(['name'=>'Name','email'=>'Email','phone'=>'Phone','submitted_at'=>'Date','id'=>'Application ID'] as $key=>$label)
                     @if(request($key))
-                        <span class="inline-flex items-center px-3 py-1.5 text-sm bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 rounded-lg">
-                            <span class="font-medium">{{ $label }}:</span>
-                            <span class="ml-1.5">{{ $key === 'submitted_at' ? \Carbon\Carbon::parse(request($key))->format('M j, Y') : request($key) }}</span>
-                            <a href="{{ request()->fullUrlWithQuery([$key=>null]) }}" 
-                               class="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
-                                <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            {{ $label }}: {{ request($key) }}
+                            <a href="{{ request()->fullUrlWithQuery([$key => null]) }}" class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500">
+                                <span class="sr-only">Remove {{ strtolower($label) }} filter</span>
+                                <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
+                                    <path fill-rule="evenodd" d="M4 3.293l2.146-2.147a.5.5 0 01.708.708L4.707 4l2.147 2.146a.5.5 0 01-.708.708L4 4.707l-2.146 2.147a.5.5 0 01-.708-.708L3.293 4 1.146 1.854a.5.5 0 01.708-.708L4 3.293z" clip-rule="evenodd" />
                                 </svg>
                             </a>
                         </span>
@@ -185,7 +222,7 @@
                             <th class="text-left py-3 px-4"><input type="checkbox" id="selectAll"></th>
                             <th class="text-left py-3 px-4 text-sm table-text-muted">
                                 <x-table.sortable-header 
-                                    field="name" 
+                                    field="id" 
                                     :sortField="$sort['field'] ?? null" 
                                     :sortDirection="$sort['direction'] ?? 'asc'"
                                     :nextDirection="$sort['nextDirection'] ?? 'desc'"
@@ -228,7 +265,17 @@
                                     Date
                                 </x-table.sortable-header>
                             </th>
-                            <th class="text-left py-3 px-4 text-sm table-text-muted">Certificate</th>
+                            <th class="text-left py-3 px-4 text-sm table-text-muted">
+                                <x-table.sortable-header 
+                                    field="certificate_status" 
+                                    :sortField="$sort['field'] ?? null" 
+                                    :sortDirection="$sort['direction'] ?? 'asc'"
+                                    :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                                    class="justify-start"
+                                >
+                                    Certificate
+                                </x-table.sortable-header>
+                            </th>
                             <th class="text-left py-3 px-4 text-sm table-text-muted">Action</th>
                         </tr>
                     </thead>

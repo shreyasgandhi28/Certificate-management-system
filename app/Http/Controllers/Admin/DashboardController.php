@@ -66,8 +66,16 @@ class DashboardController extends Controller
                     $q->whereNull('deleted_at');
                 });
             }])
-            ->orderBy($sortField, $sortDirection)
-            ->take(10);
+            ->withCount('certificates as has_certificate');
+            
+        // Apply sorting
+        if ($sortField === 'certificate_status') {
+            $query->orderBy('has_certificate', $sortDirection);
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
+        
+        $query->take(10);
 
         $recentApplications = $query->get()
             ->filter(function($applicant) {

@@ -177,7 +177,7 @@
                     <tr class="border-b border-gray-200 dark:border-gray-700">
                         <th class="text-left py-3 px-4 text-sm table-text-muted">
                             <x-table.sortable-header 
-                                field="name" 
+                                field="id" 
                                 :sortField="$sort['field'] ?? null" 
                                 :sortDirection="$sort['direction'] ?? 'asc'"
                                 :nextDirection="$sort['nextDirection'] ?? 'desc'"
@@ -225,6 +225,17 @@
                             </x-table.sortable-header>
                         </th>
                         <th class="text-left py-3 px-4 text-sm table-text-muted">
+                            <x-table.sortable-header 
+                                field="certificate_status" 
+                                :sortField="$sort['field'] ?? null" 
+                                :sortDirection="$sort['direction'] ?? 'asc'"
+                                :nextDirection="$sort['nextDirection'] ?? 'desc'"
+                                class="justify-start"
+                            >
+                                Certificate
+                            </x-table.sortable-header>
+                        </th>
+                        <th class="text-left py-3 px-4 text-sm table-text-muted">
                             <div class="flex items-center">
                                 <span>Action</span>
                             </div>
@@ -267,6 +278,20 @@
                             <div class="table-text-muted text-sm">{{ $applicant->submitted_at->diffForHumans() }}</div>
                         </td>
                         <td class="py-4 px-4">
+                            @if($applicant->certificates->count() > 0)
+                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    Generated
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                    Pending
+                                </span>
+                            @endif
+                        </td>
+                        <td class="py-4 px-4">
                             <a 
                                 href="{{ route('admin.applicants.show', $applicant) }}" 
                                 @click.stop 
@@ -278,7 +303,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="py-12 text-center table-text-muted">
+                        <td colspan="7" class="py-12 text-center table-text-muted">
                             <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>

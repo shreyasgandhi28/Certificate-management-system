@@ -43,14 +43,31 @@ class ApplicantController extends Controller
         if ($status = $request->input('status')) {
             $query->where('status', $status);
         }
+        
+        // Filter by certificate status
+        if ($certificateStatus = $request->input('certificate_status')) {
+            if ($certificateStatus === 'generated') {
+                $query->has('certificates');
+            } else {
+                $query->doesntHave('certificates');
+            }
+        }
+        
         // Filter by submitted_at (date)
         if ($date = $request->input('submitted_at')) {
             $query->whereDate('submitted_at', $date);
         }
 
         // Apply sorting
-        $validSortFields = ['id', 'name', 'email', 'phone', 'status', 'submitted_at', 'created_at'];
+        $validSortFields = ['id', 'name', 'email', 'phone', 'status', 'submitted_at', 'created_at', 'certificate_status'];
         $sort = $this->applySorting($query, $request, $validSortFields, 'created_at', 'desc');
+
+        // Handle certificate status sorting separately since it's a relationship
+        if ($sort['field'] === 'certificate_status') {
+            $direction = $sort['direction'] === 'asc' ? 'asc' : 'desc';
+            $query->withCount('certificates as has_certificate')
+                  ->orderBy('has_certificate', $direction);
+        }
 
         $applicants = $query->with('uploads')->paginate(10)->appends($request->except('page'));
 

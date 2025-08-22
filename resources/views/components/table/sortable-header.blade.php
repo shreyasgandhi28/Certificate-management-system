@@ -55,8 +55,44 @@
 @endphp
 
 <div class="{{ $wrapperClass }}">
-    <a href="{{ $url }}" class="{{ $classString }}" wire:navigate>
-        <span class="whitespace-nowrap">{{ $slot }}</span>
+    <button type="button" 
+            data-sort-field="{{ $field }}" 
+            data-sort-direction="{{ $direction }}"
+            data-sort-url="{{ $url }}"
+            {{ $attributes->merge(['class' => $classString . ' sortable-header-btn']) }}>
+        {{ $slot }}
         {!! $icon !!}
-    </a>
+    </button>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.sortable-header-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.dataset.sortUrl;
+                
+                // Save current scroll position
+                const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+                
+                // Update URL and load new content
+                window.history.pushState({}, '', url);
+                
+                // Trigger a custom event that the parent component can listen to
+                window.dispatchEvent(new CustomEvent('sort-changed', {
+                    detail: { url }
+                }));
+                
+                // Force a page reload to update the table
+                window.location.reload();
+                
+                // Restore scroll position after a short delay
+                setTimeout(() => {
+                    window.scrollTo(0, scrollPosition);
+                }, 10);
+            });
+        });
+    });
+</script>
+@endpush

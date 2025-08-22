@@ -13,6 +13,28 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
+    <!-- Clean User Profile Header -->
+    <div class="mb-8">
+        <div class="flex items-start">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-3">
+                    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ auth()->user()->name }}</h1>
+                    @php
+                        $isSuperAdmin = auth()->user()->roles->contains(function($role) {
+                            return strtolower($role->name) === 'super admin';
+                        });
+                    @endphp
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium {{ $isSuperAdmin ? 'bg-gradient-to-r from-amber-100 to-amber-50 text-amber-800 dark:from-amber-900/30 dark:to-amber-800/20 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50' : 'bg-purple-50 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-100 dark:border-purple-800/50' }}">
+                        {{ $isSuperAdmin ? 'Super Admin' : 'Certificate Issuer' }}
+                    </span>
+                </div>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->email }}</p>
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                    Member since {{ auth()->user()->created_at->format('M d, Y') }}
+                </p>
+            </div>
+        </div>
+    </div>
 
     <!-- Flash Messages -->
     @if (session('status') === 'profile-updated')

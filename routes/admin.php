@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\ApplicantController;
 use App\Http\Controllers\Admin\UploadController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['middleware' => ['auth', 'role:Super Admin|Verifier|Certificate Issuer']], function () {
+Route::group(['middleware' => ['auth', 'role:Super Admin|Certificate Issuer']], function () {
     // Dashboard
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     

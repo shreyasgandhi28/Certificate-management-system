@@ -628,7 +628,12 @@
                                 </div>
                                 <div class="text-left hidden sm:block">
                                     <div class="text-sm font-medium text-white dark:text-primary">{{ auth()->user()->name }}</div>
-                                    <div class="text-xs text-white/80 dark:text-secondary">Administrator</div>
+                                    @php
+                                        $isSuperAdmin = auth()->user()->roles->contains(function($role) {
+                                            return strtolower($role->name) === 'super admin';
+                                        });
+                                    @endphp
+                                    <div class="text-xs text-white/80 dark:text-secondary">{{ $isSuperAdmin ? 'Super Admin' : 'Certificate Issuer' }}</div>
                                 </div>
                                 <svg class="ml-2 h-4 w-4 text-white/80 dark:text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>

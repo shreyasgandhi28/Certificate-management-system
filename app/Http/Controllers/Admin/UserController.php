@@ -62,7 +62,8 @@ class UserController extends Controller
                       ->paginate(15)
                       ->appends($request->except('page'));
 
-        $roles = Role::orderBy('name')->pluck('name');
+        // Get all roles except Verifier for the filter dropdown
+        $roles = Role::where('name', '!=', 'Verifier')->orderBy('name')->pluck('name');
         
         return view('admin.users.index', [
             'users' => $users,
@@ -206,7 +207,7 @@ class UserController extends Controller
     public function create()
     {
         abort_if(!auth()->user()->hasRole('Super Admin'), 403);
-        $roles = Role::orderBy('name')->pluck('name');
+        $roles = Role::where('name', '!=', 'Verifier')->orderBy('name')->pluck('name');
         return view('admin.users.create', compact('roles'));
     }
 

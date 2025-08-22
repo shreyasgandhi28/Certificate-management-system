@@ -530,6 +530,13 @@
                                             ← Back to Sign In
                                         </a>
                                     </div>
+
+                                    <!-- Copyright inside the form -->
+                                    <div class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                        <p class="text-center text-xs text-gray-500 dark:text-gray-400">
+                                            &copy; {{ date('Y') }} Certificate Management System. All rights reserved.
+                                        </p>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -537,13 +544,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 text-center">
-        <p class="text-xs footer-text">
-            &copy; {{ date('Y') }} Certificate Management System. All rights reserved.
-        </p>
     </div>
 </body>
 </html>

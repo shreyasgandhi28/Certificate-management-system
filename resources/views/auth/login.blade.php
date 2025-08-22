@@ -487,7 +487,7 @@
                     </div>
 
                     <!-- Right Panel - Login Form -->
-                    <div class="w-full lg:w-1/2 p-8 lg:p-12 flex items-center justify-center">
+                    <div class="w-full lg:w-1/2 p-8 lg:p-12 flex items-center justify-center relative">
                         <div class="w-full max-w-sm">
                             <!-- Mobile Logo and App Name -->
                             <div class="lg:hidden text-center mb-8">
@@ -590,19 +590,18 @@
                                     Sign In to Dashboard
                                 </button>
 
+                                <!-- Copyright inside the form -->
+                                <div class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <p class="text-center text-xs text-gray-500 dark:text-gray-400">
+                                        &copy; {{ date('Y') }} Certificate Management System. All rights reserved.
+                                    </p>
+                                </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Footer - Always White -->
-    <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 text-center">
-        <p class="text-xs footer-text">
-            &copy; {{ date('Y') }} Certificate Management System. All rights reserved.
-        </p>
     </div>
 </body>
 </html>

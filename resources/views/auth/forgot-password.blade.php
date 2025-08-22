@@ -45,6 +45,72 @@
             overflow: hidden;
         }
         
+        /* Certificate-themed decorative elements */
+        .cert-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .cert-decoration::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 5%;
+            width: 200px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            transform: rotate(-15deg);
+        }
+        
+        .cert-decoration::after {
+            content: '';
+            position: absolute;
+            bottom: 15%;
+            right: 8%;
+            width: 180px;
+            height: 130px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transform: rotate(12deg);
+        }
+        
+        /* Floating certificate icons */
+        .floating-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .cert-icon {
+            position: absolute;
+            opacity: 0.06;
+            animation: float 20s infinite linear;
+        }
+        
+        .dark .cert-icon {
+            opacity: 0.03;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.06; }
+            90% { opacity: 0.06; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        .cert-icon:nth-child(1) { left: 10%; animation-delay: -5s; }
+        .cert-icon:nth-child(2) { left: 25%; animation-delay: -12s; }
+        .cert-icon:nth-child(3) { left: 70%; animation-delay: -8s; }
+        .cert-icon:nth-child(4) { left: 85%; animation-delay: -15s; }
+        
         .dark .gradient-bg {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #312e81 50%, #1e3a8a 75%, #0f172a 100%);
         }
@@ -264,9 +330,10 @@
         }
         
         .logo-svg {
-            height: 80px;
+            height: 100px;
             width: auto;
             filter: brightness(0) invert(1);
+            transition: all 0.3s ease;
             transition: all 0.3s ease;
             margin-bottom: 1rem;
         }
@@ -289,7 +356,7 @@
         /* Mobile adjustments */
         @media (max-width: 1024px) {
             .logo-svg {
-                height: 56px;
+                height: 80px;
             }
             .app-name {
                 font-size: 1.25rem;
@@ -350,6 +417,29 @@
     </button>
 
     <div class="gradient-bg flex items-center justify-center min-h-screen p-4">
+        <!-- Certificate decorations -->
+        <div class="cert-decoration"></div>
+        
+        <!-- Floating certificate icons -->
+        <div class="floating-icons">
+            <svg class="cert-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 3C2.9 3 2 3.9 2 5V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V5C22 3.9 21.1 3 20 3H4ZM19 18H5C4.45 18 4 17.55 4 17V6C4 5.45 4.45 5 5 5H19C19.55 5 20 5.45 20 6V17C20 17.55 19.55 18 19 18Z" fill="currentColor"/>
+                <path d="M14 17H7V15H14V17ZM17 13H7V11H17V13ZM17 9H7V7H17V9Z" fill="currentColor"/>
+            </svg>
+            <svg class="cert-icon" width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19Z" fill="currentColor"/>
+                <path d="M14.17 8.58L15.58 10L14.17 11.41L12.76 10L14.17 8.58ZM9.41 10L11.05 11.64L12.47 10.22L10.83 8.58L9.41 10ZM16.34 14.23L14.93 15.64L10.29 11L11.7 9.59L16.34 14.23Z" fill="currentColor"/>
+            </svg>
+            <svg class="cert-icon" width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19Z" fill="currentColor"/>
+                <path d="M14.5 13.5H16V10.5H14.5V13.5ZM7.5 10.5V12H12V10.5H7.5ZM16.5 15.5H7.5V17H16.5V15.5Z" fill="currentColor"/>
+            </svg>
+            <svg class="cert-icon" width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19Z" fill="currentColor"/>
+                <path d="M14.5 10.5H16V13.5H14.5V10.5ZM7.5 10.5H13V12H7.5V10.5ZM7.5 13.5H16V15H7.5V13.5Z" fill="currentColor"/>
+            </svg>
+        </div>
+        
         <div class="w-full max-w-4xl">
             <div class="login-card overflow-hidden">
                 <div class="flex min-h-[600px]">
